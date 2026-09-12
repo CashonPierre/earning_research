@@ -14,6 +14,6 @@ Deadline: 2026-09-14 23:59 HKT. Plan: docs/PLAN.md. Update this file after every
 | 8 figures | DONE | outputs/figures/*.png | 2026-09-13 03:00 |
 | 9 report | DONE | docs/report.md | 2026-09-13 03:15 |
 | 10 README + disclosure | DONE | README.md | 2026-09-13 03:20 |
-| 11 tests green + final commit + GitHub push | TODO | | |
+| 11 tests green + final commit + GitHub push | DONE | | 2026-09-13 03:35 |
 
-NEXT: stage 11 (tests, final commit, GitHub push). OVERALL: IN_PROGRESS
+NEXT: none. Candidate to review docs/report.md, make the GitHub repo public, and submit. OVERALL: COMPLETE
