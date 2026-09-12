@@ -1,0 +1,274 @@
+{
+ "run_at_utc": "2026-09-12T17:00:41+00:00",
+ "probes": {
+  "grouped_2004-01-05": {
+   "ok": true,
+   "result": {
+    "date": "2004-01-05",
+    "n_tickers": 7761,
+    "spy_close": 112.44
+   },
+   "secs": 3.21
+  },
+  "grouped_2010-05-03": {
+   "ok": true,
+   "result": {
+    "date": "2010-05-03",
+    "n_tickers": 7546,
+    "spy_close": 120.35
+   },
+   "secs": 1.29
+  },
+  "grouped_2016-01-04": {
+   "ok": true,
+   "result": {
+    "date": "2016-01-04",
+    "n_tickers": 7963,
+    "spy_close": 201.0192
+   },
+   "secs": 1.15
+  },
+  "grouped_2026-09-11": {
+   "ok": true,
+   "result": {
+    "date": "2026-09-11",
+    "n_tickers": 12481,
+    "spy_close": 764.29
+   },
+   "secs": 1.23
+  },
+  "grouped_unadjusted_2020-08-28": {
+   "ok": true,
+   "result": {
+    "date": "2020-08-28",
+    "n_tickers": 8766,
+    "spy_close": 350.58,
+    "note": "AAPL 4:1 split effective 2020-08-31"
+   },
+   "secs": 0.87
+  },
+  "tickers_pit_2012_CS": {
+   "ok": true,
+   "result": {
+    "first": "A"
+   },
+   "secs": 0.83
+  },
+  "tickers_delisted_count_sample": {
+   "ok": true,
+   "result": {
+    "n_first_page": 1000
+   },
+   "secs": 0.72
+  },
+  "splits_recent": {
+   "ok": true,
+   "result": {
+    "n": 5
+   },
+   "secs": 0.56
+  },
+  "dividends_recent": {
+   "ok": true,
+   "result": {
+    "n": 5
+   },
+   "secs": 0.57
+  },
+  "benzinga_earnings_2024-01-25": {
+   "ok": false,
+   "error": "MassiveError: HTTP 403 for https://api.massive.com/benzinga/v1/earnings?date=2024-01-25&limit=1000: {\"status\":\"ERROR\",\"request_id\":\"36fd4f2c7f514b8e88ad8161f236e91f\",\"error\":\"You are not entitled to this data. Plea",
+   "secs": 0.57
+  },
+  "benzinga_earnings_2011-01-25": {
+   "ok": false,
+   "error": "MassiveError: HTTP 403 for https://api.massive.com/benzinga/v1/earnings?date=2011-01-25&limit=1000: {\"status\":\"ERROR\",\"request_id\":\"2dbc7209dc774910baab04297c59aad6\",\"error\":\"You are not entitled to this data. Plea",
+   "secs": 0.56
+  },
+  "eightk_disc_nofilter_desc": {
+   "ok": true,
+   "result": {
+    "n": 5,
+    "has_next": true,
+    "min_date": "2026-09-11",
+    "max_date": "2026-09-11",
+    "cats_sample": [
+     [
+      "leadership_and_governance",
+      "executive_leadership",
+      "ceo_appointment"
+     ],
+     [
+      "leadership_and_governance",
+      "executive_leadership",
+      "executive_compensation_change"
+     ],
+     [
+      "operations_and_strategy",
+      "business_developments",
+      "clinical_trial_results"
+     ],
+     [
+      "operations_and_strategy",
+      "material_agreements",
+      "settlement_agreement"
+     ],
+     [
+      "shareholder_activity",
+      "shareholder_meetings",
+      "special_meeting_results"
+     ]
+    ]
+   },
+   "secs": 0.59
+  },
+  "eightk_disc_nofilter_asc": {
+   "ok": true,
+   "result": {
+    "n": 5,
+    "has_next": true,
+    "min_date": "2020-01-02",
+    "max_date": "2020-01-02",
+    "cats_sample": [
+     [
+      "capital_and_financing",
+      "shareholder_returns",
+      "dividend_declaration"
+     ],
+     [
+      "leadership_and_governance",
+      "board_of_directors",
+      "director_departure"
+     ],
+     [
+      "leadership_and_governance",
+      "executive_leadership",
+      "ceo_departure"
+     ],
+     [
+      "regulatory_and_compliance",
+      "auditor_matters",
+      "auditor_dismissal"
+     ],
+     [
+      "strategic_transactions",
+      "deal_terminations",
+      "deal_termination"
+     ]
+    ]
+   },
+   "secs": 0.67
+  },
+  "eightk_disc_2024-01-25_all": {
+   "ok": true,
+   "result": {
+    "n": 314,
+    "has_next": false,
+    "min_date": "2024-01-25",
+    "max_date": "2024-01-25",
+    "cats_sample": [
+     [
+      "capital_and_financing",
+      "debt_activity",
+      "credit_facility"
+     ],
+     [
+      "capital_and_financing",
+      "debt_activity",
+      "credit_facility_draw"
+     ],
+     [
+      "capital_and_financing",
+      "debt_activity",
+      "debt_issuance"
+     ],
+     [
+      "capital_and_financing",
+      "debt_activity",
+      "guarantee_or_letter_of_credit"
+     ],
+     [
+      "capital_and_financing",
+      "debt_distress",
+      "covenant_violation"
+     ],
+     [
+      "capital_and_financing",
+      "debt_distress",
+      "debt_acceleration"
+     ]
+    ]
+   },
+   "secs": 1.33
+  },
+  "eightk_disc_2024-01-25_quarterly": {
+   "ok": true,
+   "result": {
+    "n": 0,
+    "has_next": false,
+    "min_date": null,
+    "max_date": null,
+    "cats_sample": []
+   },
+   "secs": 0.58
+  },
+  "eightk_disc_2015-01-27_all": {
+   "ok": true,
+   "result": {
+    "n": 0,
+    "has_next": false,
+    "min_date": null,
+    "max_date": null,
+    "cats_sample": []
+   },
+   "secs": 0.57
+  },
+  "eightk_disc_2006-01-25_all": {
+   "ok": true,
+   "result": {
+    "n": 0,
+    "has_next": false,
+    "min_date": null,
+    "max_date": null,
+    "cats_sample": []
+   },
+   "secs": 0.59
+  },
+  "taxonomy": {
+   "ok": true,
+   "result": {
+    "n": 119
+   },
+   "secs": 1.64
+  },
+  "eightk_text_2024-01-25": {
+   "ok": true,
+   "result": {
+    "n": 100
+   },
+   "secs": 1.72
+  },
+  "sec_index_8k_2012-01-25": {
+   "ok": true,
+   "result": {
+    "n": 319
+   },
+   "secs": 0.58
+  },
+  "income_statements_AAPL": {
+   "ok": true,
+   "result": {
+    "n": 5
+   },
+   "secs": 0.67
+  },
+  "quotes_one_page": {
+   "ok": true,
+   "result": {
+    "n": 5
+   },
+   "secs": 0.6
+  }
+ },
+ "total_calls": 22
+}
