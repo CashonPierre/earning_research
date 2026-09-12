@@ -1,0 +1,17 @@
+step,n_events
+edgar_item202_rows,321077
+8k_not_amended,318081
+unique_cik_day0,316021
+with_candidate_ticker,311923
+matched_to_prices,288469
+after_dedupe_20d,271534
+exchange_filter,271460
+plus_price_filter,226721
+plus_liquidity_filter,184493
+plus_history_filter,181927
+plus_not_intraday,145809
+in_sample_period_filtered,142358
+selected_top_decile_trailing,14770
+selected_fixed_5pct,26611
+selected_z0_ge_2,35517
+selected_bottom_decile,14771

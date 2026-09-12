@@ -5,15 +5,15 @@ Deadline: 2026-09-14 23:59 HKT. Plan: docs/PLAN.md. Update this file after every
 | stage | status | output | updated_hkt |
 |---|---|---|---|
 | 1 data download (grouped, tickers, splits, EDGAR) | DONE | data/raw/* | 2026-09-13 01:36 |
-| 2 events + universe + selection | TODO | data/processed/events.parquet | |
-| 3 backtest engine + decomposition + controls | TODO | outputs/tables/main_*.csv | |
-| 4 statistics (NW, season bootstrap) | TODO | outputs/tables/stats_*.csv | |
-| 5 parameter grid (selection vs hold-out) | TODO | outputs/tables/grid_*.csv | |
-| 6 costs | TODO | outputs/tables/costs_*.csv | |
-| 7 robustness MUST | TODO | outputs/tables/robust_*.csv | |
-| 8 figures | TODO | outputs/figures/*.png | |
-| 9 report | TODO | docs/report.md | |
-| 10 README + disclosure | TODO | README.md | |
+| 2 events + universe + selection | DONE | data/processed/events.parquet | 2026-09-13 02:20 |
+| 3 backtest engine + decomposition + controls | DONE | outputs/tables/main_*.csv | 2026-09-13 02:30 |
+| 4 statistics (NW, season bootstrap) | DONE | outputs/tables/stats_*.csv | 2026-09-13 02:30 |
+| 5 parameter grid (selection vs hold-out) | DONE | outputs/tables/grid_*.csv | 2026-09-13 02:45 |
+| 6 costs | DONE | outputs/tables/costs_*.csv | 2026-09-13 02:55 |
+| 7 robustness MUST | DONE | outputs/tables/robust_*.csv | 2026-09-13 02:55 |
+| 8 figures | DONE | outputs/figures/*.png | 2026-09-13 03:00 |
+| 9 report | DONE | docs/report.md | 2026-09-13 03:15 |
+| 10 README + disclosure | DONE | README.md | 2026-09-13 03:20 |
 | 11 tests green + final commit + GitHub push | TODO | | |
 
-NEXT: stage 2. OVERALL: IN_PROGRESS
+NEXT: stage 11 (tests, final commit, GitHub push). OVERALL: IN_PROGRESS
