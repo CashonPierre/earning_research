@@ -1,6 +1,6 @@
 # Execution plan — PEAD breakout timing (Round 1 research assessment)
 
-Written 2026-09-13 02:10 HKT after reviewing the submitted proposal against the club brief and the live Massive API. Deadline: 2026-09-14 23:59 HKT. This file is the contract for the autonomous run; every deviation goes in `logs/decision_log.csv`.
+Written 2026-09-13 02:05 HKT after reviewing the submitted proposal against the club brief and the live Massive API. Deadline: 2026-09-14 23:59 HKT. This file is the contract for the autonomous run; every deviation goes in `logs/decision_log.csv`.
 
 ## 0. What the review changed (summary of verified findings)
 1. **Rule A beats Rule B mechanically on every breakout event** (A = run-up × post-breakout leg; B = post-breakout leg only), so "B > A" is a test of a momentum filter, not of *when* drift occurs. The primary test becomes a **within-event decomposition** of per-day abnormal return before vs after the breakout, with controls. B vs A stays as a secondary result with this explanation.
