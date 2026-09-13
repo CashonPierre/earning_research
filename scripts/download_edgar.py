@@ -7,6 +7,7 @@ report can state coverage. Checkpoints every 500 CIKs; resume skips CIKs already
 """
 from __future__ import annotations
 
+import os, pathlib as _pl; os.chdir(_pl.Path(__file__).resolve().parents[1])  # always run from the repo root
 import concurrent.futures as cf
 import logging
 import pathlib
@@ -19,7 +20,11 @@ import pandas as pd
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from pead.edgar import EdgarClient, earnings_8ks  # noqa: E402
 
-UA = "HKUST student research assessment woody.lei@bit.com"
+from dotenv import load_dotenv
+load_dotenv()
+UA = os.environ.get("EDGAR_USER_AGENT", "").strip()
+if "@" not in UA:
+    raise SystemExit("Set EDGAR_USER_AGENT='Your Name your@email' in .env (the SEC requires a contact in the User-Agent)")
 RAW = pathlib.Path("data/raw")
 OUT = RAW / "edgar_8k_202.parquet"
 COV = RAW / "edgar_coverage.parquet"

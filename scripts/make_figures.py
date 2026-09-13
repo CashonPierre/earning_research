@@ -1,4 +1,5 @@
 """Stage 8: figures for the report (matplotlib, Agg)."""
+import os, pathlib as _pl; os.chdir(_pl.Path(__file__).resolve().parents[1])  # always run from the repo root
 import pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 import matplotlib; matplotlib.use("Agg")
@@ -6,7 +7,9 @@ import matplotlib.pyplot as plt, numpy as np, pandas as pd
 from pead.backtest import Windows, run_rules
 SEL_END = "2014-12-31"; W, H = 10, 40; FIG = pathlib.Path("outputs/figures"); FIG.mkdir(parents=True, exist_ok=True)
 ev = pd.read_parquet("data/processed/events.parquet"); sel = ev[ev.selected].reset_index(drop=True)
-win = Windows(sel); res = run_rules(win, W, H, m_fixed=2)
+import json
+m_fixed = json.load(open("outputs/tables/main_meta_W10_H40.json"))["m_fixed"]
+win = Windows(sel); res = run_rules(win, W, H, m_fixed=m_fixed)
 path = win.event_time_path(60); q = sel.quarter.to_numpy(); selmask = (sel.d0 <= SEL_END).to_numpy()
 def season_ci(mat, groups, n_boot=2000, seed=0):
     rng = np.random.default_rng(seed); g = pd.Series(groups); keys = g.unique(); idx = [np.where(g.values == k)[0] for k in keys]

@@ -9,6 +9,9 @@ import os
 import pathlib
 import subprocess
 
+import pytest
+from dotenv import load_dotenv
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
@@ -26,9 +29,10 @@ def test_env_is_ignored():
 
 
 def test_key_value_not_in_repo():
+    load_dotenv(ROOT / ".env", override=False)
     key = os.environ.get("MASSIVE_API_KEY", "").strip()
     if not key:
-        return  # nothing to scan for
+        pytest.skip("MASSIVE_API_KEY not set; key-value scan skipped")
     for p in _repo_files():
         if p.name == ".env" or p.suffix in {".parquet", ".png", ".pdf"}:
             continue
@@ -40,5 +44,5 @@ def test_key_value_not_in_repo():
 
 
 def test_no_apikey_query_param():
-    for p in (ROOT / "src").rglob("*.py"):
+    for p in list((ROOT / "src").rglob("*.py")) + list((ROOT / "scripts").rglob("*.py")):
         assert "apiKey=" not in p.read_text(), f"{p} passes the key in a URL"

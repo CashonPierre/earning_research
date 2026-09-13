@@ -7,29 +7,31 @@ import pandas as pd
 from .backtest import Windows, run_rules, season_bootstrap
 
 
-def matched_control(win: Windows, res: pd.DataFrame, H: int) -> np.ndarray:
-    """For each breakout event with entry day e=k+1, the unconditional mean per-day abnormal return of ALL
-    events in the same season over event days e..H (Rule A path). Removes the mechanical conditioning
-    of the post-breakout leg while matching event time and season."""
-    path = win.event_time_path(H)  # E x H daily AR, day 1..H
-    q = win.ev["quarter"].to_numpy()
-    out = np.full(len(res), np.nan)
-    cum = {}
-    for s in np.unique(q):
-        m = path[q == s].mean(axis=0)            # mean daily AR by event day for that season
-        cum[s] = np.concatenate([[0.0], np.cumsum(m)])  # cum[d] = sum of days 1..d
+def matched_control(win: Windows, res: pd.DataFrame, H: int, sign: float = 1.0) -> np.ndarray:
+    """For each breakout event with entry day e = k+1, the mean per-day abnormal return that ALL selected
+    events in the same season earned over the identical span open(e) -> close(H). Same span basis as the
+    treated leg (so the overnight gap into the entry day is excluded from both), matched on season and
+    event time; this removes the mechanical conditioning of the pre-breakout leg.
+    `res` may be any subset of win.ev; rows are aligned through res.index."""
+    q_all = win.ev["quarter"].to_numpy()
+    E = len(win.ev)
+    idx = res.index.to_numpy()
     ent = res["entry_B"].to_numpy()
-    for i in range(len(res)):
-        if np.isnan(ent[i]):
+    out = np.full(len(res), np.nan)
+    cache = {}
+    for e in np.unique(ent[~np.isnan(ent)]).astype(int):
+        span = sign * win.span_ab(np.full(E, float(e)), H) / (H - e + 1)
+        cache[e] = pd.Series(span).groupby(q_all).mean()
+    for j, (i, e) in enumerate(zip(idx, ent)):
+        if np.isnan(e):
             continue
-        e = int(ent[i]); c = cum[q[i]]
-        out[i] = (c[H] - c[e - 1]) / (H - e + 1)
+        out[j] = cache[int(e)].get(q_all[i], np.nan)
     return out
 
 
-def cell_stats(win: Windows, res: pd.DataFrame, H: int, label: str, extra: dict | None = None) -> dict:
+def cell_stats(win: Windows, res: pd.DataFrame, H: int, label: str, extra: dict | None = None, sign: float = 1.0) -> dict:
     q = res["quarter"].to_numpy()
-    ctrl = matched_control(win, res, H) if "entry_B" in res else None
+    ctrl = matched_control(win, res, H, sign=sign) if "entry_B" in res else None
     r = {"label": label, "n_events": int(len(res)), "share_entered_B": float(res["entered_B"].mean()), "median_k": float(np.nanmedian(res["k_B"]))}
     for name, v in (("CAR_A", res["ret_A"]), ("CAR_B", res["ret_B"]), ("B_minus_A", res["ret_B"] - res["ret_A"]),
                     ("C_minus_A", res["ret_C"] - res["ret_A"] if "ret_C" in res else pd.Series(np.nan, index=res.index)),

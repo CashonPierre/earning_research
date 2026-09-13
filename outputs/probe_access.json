@@ -6,7 +6,7 @@
    "result": {
     "date": "2004-01-05",
     "n_tickers": 7761,
-    "spy_close": 112.44
+    "spy_close": "present"
    },
    "secs": 3.21
   },
@@ -15,7 +15,7 @@
    "result": {
     "date": "2010-05-03",
     "n_tickers": 7546,
-    "spy_close": 120.35
+    "spy_close": "present"
    },
    "secs": 1.29
   },
@@ -24,7 +24,7 @@
    "result": {
     "date": "2016-01-04",
     "n_tickers": 7963,
-    "spy_close": 201.0192
+    "spy_close": "present"
    },
    "secs": 1.15
   },
@@ -33,7 +33,7 @@
    "result": {
     "date": "2026-09-11",
     "n_tickers": 12481,
-    "spy_close": 764.29
+    "spy_close": "present"
    },
    "secs": 1.23
   },
@@ -42,7 +42,7 @@
    "result": {
     "date": "2020-08-28",
     "n_tickers": 8766,
-    "spy_close": 350.58,
+    "spy_close": "present",
     "note": "AAPL 4:1 split effective 2020-08-31"
    },
    "secs": 0.87
@@ -92,33 +92,7 @@
     "has_next": true,
     "min_date": "2026-09-11",
     "max_date": "2026-09-11",
-    "cats_sample": [
-     [
-      "leadership_and_governance",
-      "executive_leadership",
-      "ceo_appointment"
-     ],
-     [
-      "leadership_and_governance",
-      "executive_leadership",
-      "executive_compensation_change"
-     ],
-     [
-      "operations_and_strategy",
-      "business_developments",
-      "clinical_trial_results"
-     ],
-     [
-      "operations_and_strategy",
-      "material_agreements",
-      "settlement_agreement"
-     ],
-     [
-      "shareholder_activity",
-      "shareholder_meetings",
-      "special_meeting_results"
-     ]
-    ]
+    "cats_sample": "5 category triples (omitted)"
    },
    "secs": 0.59
   },
@@ -129,33 +103,7 @@
     "has_next": true,
     "min_date": "2020-01-02",
     "max_date": "2020-01-02",
-    "cats_sample": [
-     [
-      "capital_and_financing",
-      "shareholder_returns",
-      "dividend_declaration"
-     ],
-     [
-      "leadership_and_governance",
-      "board_of_directors",
-      "director_departure"
-     ],
-     [
-      "leadership_and_governance",
-      "executive_leadership",
-      "ceo_departure"
-     ],
-     [
-      "regulatory_and_compliance",
-      "auditor_matters",
-      "auditor_dismissal"
-     ],
-     [
-      "strategic_transactions",
-      "deal_terminations",
-      "deal_termination"
-     ]
-    ]
+    "cats_sample": "5 category triples (omitted)"
    },
    "secs": 0.67
   },
@@ -166,38 +114,7 @@
     "has_next": false,
     "min_date": "2024-01-25",
     "max_date": "2024-01-25",
-    "cats_sample": [
-     [
-      "capital_and_financing",
-      "debt_activity",
-      "credit_facility"
-     ],
-     [
-      "capital_and_financing",
-      "debt_activity",
-      "credit_facility_draw"
-     ],
-     [
-      "capital_and_financing",
-      "debt_activity",
-      "debt_issuance"
-     ],
-     [
-      "capital_and_financing",
-      "debt_activity",
-      "guarantee_or_letter_of_credit"
-     ],
-     [
-      "capital_and_financing",
-      "debt_distress",
-      "covenant_violation"
-     ],
-     [
-      "capital_and_financing",
-      "debt_distress",
-      "debt_acceleration"
-     ]
-    ]
+    "cats_sample": "6 category triples (omitted)"
    },
    "secs": 1.33
   },
@@ -208,7 +125,7 @@
     "has_next": false,
     "min_date": null,
     "max_date": null,
-    "cats_sample": []
+    "cats_sample": "0 category triples (omitted)"
    },
    "secs": 0.58
   },
@@ -219,7 +136,7 @@
     "has_next": false,
     "min_date": null,
     "max_date": null,
-    "cats_sample": []
+    "cats_sample": "0 category triples (omitted)"
    },
    "secs": 0.57
   },
@@ -230,7 +147,7 @@
     "has_next": false,
     "min_date": null,
     "max_date": null,
-    "cats_sample": []
+    "cats_sample": "0 category triples (omitted)"
    },
    "secs": 0.59
   },

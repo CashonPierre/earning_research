@@ -74,7 +74,9 @@ Sections mapped one-to-one to the brief's list, including "how the project diffe
 ## 14. README
 Setup (uv sync, .env), run order (`scripts/run_all.py`), tests, outputs, parameter table, and the disclosure section: papers, external data (SEC EDGAR), AI tools (Claude Code: proposal review, code, analysis runs, report drafting; candidate reviewed and is responsible), own Massive subscription used, no other person.
 
-## 15. Timeline (HKT) and cut lines
+## 15. Planned timeline (HKT) and cut lines
+
+*Written at 02:05 before execution. The run was much faster than planned; actual completion times per stage are in `STATUS.md` and the logs.*
 02:15-03:30 events + universe + selection; 03:30-05:00 backtest engine, decomposition, controls, statistics; 05:00-06:30 grid, costs, MUST robustness; 06:30-08:00 figures, tables, report, README; 08:00-09:00 tests, final commit, private GitHub push. Cut order if behind: NICE items, then SHOULD items, then matched non-earnings placebo (keep pre-earnings placebo), then short-side mirror. Margin: at least 12 hours before the deadline for the candidate to read, question and submit.
 
 ## 16. Risks and resume protocol

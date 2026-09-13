@@ -35,8 +35,9 @@ data/raw, data/processed    git-ignored (licensed data; ~2 GB)
 Requires Python 3.12 and [uv](https://docs.astral.sh/uv/). macOS/Linux:
 
 ```bash
+uv python install 3.12    # only if Python 3.12 is not already present
 uv sync
-cp .env.example .env      # then put your own key in MASSIVE_API_KEY=...
+cp .env.example .env      # then put your own key in MASSIVE_API_KEY=... and your name/email in EDGAR_USER_AGENT
 ```
 
 The key is read only from the environment (via the git-ignored `.env`), sent only as an `Authorization: Bearer` header, never written to URLs, logs or exceptions (`src/pead/preflight.py::mask`), and `tests/test_secrets.py` fails if the key value ever appears in a tracked file. `REQUIRE_HK_IP=1` in `.env` makes the client refuse to call the API unless the public IP resolves to Hong Kong (the client account rules); set `0` to disable.
@@ -49,7 +50,19 @@ The key is read only from the environment (via the git-ignored `.env`), sent onl
 
 Stages (each is idempotent and skips existing outputs): `download_market.py` (Daily Market Summary 2004-2026 unadjusted, All Tickers, Splits; ~6,000 calls, ~30 min), `download_edgar.py` (SEC EDGAR submissions for 9,679 CIKs, ~30 min at 9 req/s), `build_panel.py`, `build_events.py`, `run_main.py 10 40`, `run_grid.py`, `run_robustness.py`, `make_figures.py`, `export_aggregates.py`. Then `build_notebook.py` re-executes the notebook and rewrites `docs/report.md` from the committed tables only (no licensed data needed), and `render_report.py` produces the HTML and PDF. Total runtime about 70 minutes, peak RAM about 3 GB, disk about 2 GB. `scripts/probe_access.py` records which endpoints the account can reach.
 
-Tests: `.venv/bin/python -m pytest -q` (set `RUN_API_TESTS=1` to include the live cross-check of our split adjustment against vendor-adjusted bars).
+```bash
+.venv/bin/python scripts/run_all.py             # downloads + panel + events; analysis stages skip because their outputs are committed
+.venv/bin/python scripts/run_all.py --analysis  # recompute every table and figure from data/processed (overwrites the committed CSV/PNG files)
+.venv/bin/python scripts/build_notebook.py && .venv/bin/python scripts/render_report.py   # regenerate the notebook, report.md, html and pdf
+```
+
+`--force` also re-invokes the download scripts, which resume and only re-fetch the current year. Re-running `scripts/run_robustness.py` refreshes rows R00-R16 of the experiment record in place.
+
+### What you can check without any data or key
+
+Every number in the report is in `outputs/tables/*.csv`, and `notebooks/report.ipynb` and `docs/report.md` are regenerated from those CSVs alone by `scripts/build_notebook.py`. `python -m pytest -q` on a fresh clone runs the unit tests for split adjustment (`tests/test_prices.py`), the EDGAR parser on a committed fixture (`tests/test_edgar.py`) and the secret scan (`tests/test_secrets.py`); the event-construction tests, the grouped-bar integrity test and the live API cross-check skip visibly until the data exist (`RUN_API_TESTS=1` enables the live check).
+
+Tests: `.venv/bin/python -m pytest -q`.
 
 ## Parameters and design choices
 

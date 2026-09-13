@@ -1,5 +1,6 @@
 """Stage 3/4: default cell (W=10, H=40): main tables, decomposition, controls, calendar-time stats."""
 import json, pathlib, sys, time
+import os, pathlib as _pl; os.chdir(_pl.Path(__file__).resolve().parents[1])  # always run from the repo root
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 import numpy as np, pandas as pd
 from pead.backtest import Windows, run_rules, calendar_time, newey_west_t, season_bootstrap, season_share
@@ -43,7 +44,7 @@ def summarise(r, label):
     add("per-day AR non-breakout events (1..H)", r.perday_nonbreak.to_numpy())
     add("per-day AR all events (Rule A)", r.perday_A.to_numpy())
     # primary statistic: post minus pre per-day AR on breakout events (paired within event)
-    add("PRIMARY: post minus pre per-day AR (breakout events)", (r.perday_post - r.perday_pre).to_numpy())
+    add("post minus pre per-day AR (breakout events; pre leg conditioned on the crossing; descriptive only)", (r.perday_post - r.perday_pre).to_numpy())
     # post-breakout per-day minus non-breakout per-day (two samples)
     b = season_bootstrap(r.perday_post.to_numpy(), q, values2=r.perday_nonbreak.to_numpy(), groups2=q)
     rows.append({"period": label, "statistic": "post-breakout per-day minus non-breakout per-day", "mean": b["point"], "ci_lo": b["ci_lo"], "ci_hi": b["ci_hi"], "n_events": int(r.entered_B.sum()), "n_seasons": b["n_seasons"]})
@@ -62,7 +63,7 @@ for col in ("range_tercile", "liq_tercile", "period"):
     for g, r in res.groupby(col):
         q = r.quarter.to_numpy()
         prim = season_bootstrap((r.perday_post - r.perday_pre).to_numpy(), q); ba = season_bootstrap((r.ret_B - r.ret_A).to_numpy(), q)
-        strat.append({"split": col, "group": g, "n": len(r), "share_entered_B": r.entered_B.mean(), "median_k": np.nanmedian(r.k_B), "CAR_A": r.ret_A.mean(), "CAR_B": r.ret_B.mean(), "B_minus_A": ba["point"], "B_minus_A_lo": ba["ci_lo"], "B_minus_A_hi": ba["ci_hi"], "primary_post_minus_pre": prim["point"], "primary_lo": prim["ci_lo"], "primary_hi": prim["ci_hi"]})
+        strat.append({"split": col, "group": g, "n": len(r), "share_entered_B": r.entered_B.mean(), "median_k": np.nanmedian(r.k_B), "CAR_A": r.ret_A.mean(), "CAR_B": r.ret_B.mean(), "B_minus_A": ba["point"], "B_minus_A_lo": ba["ci_lo"], "B_minus_A_hi": ba["ci_hi"], "post_minus_pre_perday_descriptive": prim["point"], "post_minus_pre_lo": prim["ci_lo"], "post_minus_pre_hi": prim["ci_hi"]})
 pd.DataFrame(strat).to_csv(OUT / f"stratified_W{W}_H{H}.csv", index=False)
 print(pd.DataFrame(strat).to_string(index=False, float_format=lambda x: f"{x:.4f}"))
 # calendar-time

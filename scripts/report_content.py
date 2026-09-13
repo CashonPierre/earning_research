@@ -29,7 +29,7 @@ I looked at 14,770 cases from 2005 to 2026 where a US stock had a top-10% price 
 * **Rule A** buys at the open of the next day and sells 40 trading days after the earnings day.
 * **Rule B** waits, buys at the open after the first close above the earnings-day high, and sells on the same day as Rule A. If the stock never breaks out, Rule B does nothing.
 
-**Result: the idea does not hold.** After a breakout, the stock does not drift more than it does on average. Rule B earned *less* than Rule A, especially in 2005 to 2014 (about 0.9% less per case, and the gap is statistically clear), and about the same in 2015 to 2026. The reason is partly mechanical: on every case that does break out, Rule B skips the run-up that Rule A collected, and Rule B can only win if the cases that never break out fall a lot. "Wait for a higher close" rules that use other price levels behave exactly like Rule B, and so does a placebo test on days with no news. Buying right after the report earned a modest +1.4% over 40 days before 2015 and nothing after, and even the early drift disappears once realistic trading costs are charged.
+**Result: the idea does not hold.** After a breakout, the stock drifts no more than it does on average; if anything, slightly less (about 0.9 basis points per day less, and the confidence interval excludes zero). Rule B earned *less* than Rule A, especially in 2005 to 2014 (about 0.9% less per case, and the gap is statistically clear), and about the same in 2015 to 2026. The reason is partly mechanical: on every case that does break out, Rule B skips the run-up that Rule A collected, and Rule B can only win if the cases that never break out fall a lot. "Wait for a higher close" rules that use other price levels behave exactly like Rule B, and so does a placebo test on days with no news. Buying right after the report earned a modest +1.4% over 40 days before 2015 and nothing after, and even the early drift disappears once realistic trading costs are charged.
 
 So the honest conclusion is: **the hypothesis is rejected**, the original way of testing it was flawed, and the small drift that exists is old and not tradable.
 """},
@@ -49,7 +49,9 @@ After a strong earnings reaction, does the stock's extra return (relative to the
 
 **Secondary version (the proposal's original wording).** Rule B earns a higher 40-day return than Rule A.
 
-I wrote down in advance (in `docs/PLAN.md`) what would count as support: the primary statistic (defined in section 8) must be positive with a 95% confidence interval that excludes zero in *both* the 2005 to 2014 period and the 2015 to 2026 period, and the control rules (section 7) must *not* show the same pattern. If the pattern also appears in the no-news placebo, the effect is mechanical rather than real.
+**What was fixed in advance, and what was not.** Before any result, `docs/PLAN.md` (02:05) fixed the rules, the controls, the filters, the default parameters and this test: the per-day abnormal return *after* the breakout must beat both the per-day return *before* it and the per-day return of events that never break out. After the first run I realised that the first half of that test is meaningless, because the days before a breakout are, by definition, days on which the stock went up (see the toy example in section 7). I therefore replaced it, *before* running the parameter grid or any robustness check, with the comparison against the normal path over the same days, defined in section 8. This change is logged (`logs/decision_log.csv`, 02:13) and the discarded version is kept in the tables as a descriptive row so that nothing is hidden. The second half of the original test (post-breakout beats non-breakout events) is numerically satisfied, but for the same reason it is not evidence about timing: events that never break out are defined by having gone down.
+
+Support for H1 would have required: a positive primary statistic with a 95% confidence interval excluding zero in *both* the 2005 to 2014 period and the 2015 to 2026 period; the control rules (section 7) *not* showing the same pattern; and a flat placebo.
 """},
 
 {"md": """
@@ -66,15 +68,18 @@ I wrote down in advance (in `docs/PLAN.md`) what would count as support: the pri
 
 The proposal was written before I had API access. Once I could read the documentation in detail and run probe calls, several things had to change. Each change is a dated row in `logs/decision_log.csv`.
 
-| # | What the proposal said | What I found | What had been tested at that point | What I did instead | What I learned |
+| # | What the proposal said | What I found | What had been tested at that point | What I did instead, and why it is better | What I learned |
 |---|---|---|---|---|---|
-| 1 | Classify reports as before-open or after-close from the timestamp on the Massive 8-K endpoint | That endpoint has a filing *date* but no time. Its earnings tags also start only in 2020 and missed most earnings releases on a test day | Nothing modelled yet, only probes | Used the SEC EDGAR "submissions" feed, which gives the exact time the SEC accepted each 8-K and whether it contains Item 2.02 (results of operations) | Check the field list, not just the endpoint name |
-| 2 | Rank events into the top 10% *within each quarter* | You do not know the quarter's ranking when the first events of the quarter happen: that is look-ahead | Nothing run | Threshold = 90th percentile of reactions over the *previous* four quarters, known on the day | Every selection rule must be computable on the trade date |
-| 3 | Rule B "buys once the stock closes above the high" | You cannot buy at a closing price you have not seen yet | Nothing run | All rules buy at the *next open* after the signal; a "buy at the close" version is reported as a robustness check | Define the fill price before the hypothesis |
-| 4 | Rule B beating Rule A would show that drift is concentrated after the breakout | On every case that breaks out, Rule A's return contains Rule B's return *plus* the run-up. So A beats B automatically on those cases; B can only win overall if non-breakout cases fall a lot | Nothing run (found in design review) | Made the primary test a comparison of the per-day return after the breakout with the normal per-day return; kept B versus A as a secondary result with control rules | Write down the algebra of a comparison before coding it |
-| 5 | Use "Ticker Events" for delistings | That endpoint only lists symbol changes | Probe | Built the list of dead stocks from the ticker master (active = false) and matched events by company ID (CIK) | Survivorship protection has to be built, not assumed |
-| 6 | Estimate spreads from tick-level quotes | Far too much data for the machine, and not needed | Probe | Corwin-Schultz (2012) spread estimate from daily highs and lows | Use what is already downloaded |
-| 7 | Use Benzinga earnings data or income statements as a second "surprise" measure | Benzinga returned "not entitled" (HTTP 403) | Probe | Surprise measured by the price reaction only, with two alternative cut-offs as robustness | Probe entitlements before designing around a dataset |
+| 1 | Classify reports as before-open or after-close from the timestamp on the Massive 8-K endpoint | That endpoint has a filing *date* but no time. Its earnings tags also start only in 2020 and missed most earnings releases on a test day | Nothing modelled yet, only probes | Used the SEC EDGAR "submissions" feed, which gives the exact time the SEC accepted each 8-K and whether it contains Item 2.02 (results of operations). Better because the acceptance time is the moment the filing became public, so day 0 is point-in-time by construction | Check the field list, not just the endpoint name |
+| 2 | Rank events into the top 10% *within each quarter* | You do not know the quarter's ranking when the first events of the quarter happen: that is look-ahead | Nothing run | Threshold = 90th percentile of reactions over the *previous* four quarters, known on the day. Better because a trader could have applied it in real time | Every selection rule must be computable on the trade date |
+| 3 | Rule B "buys once the stock closes above the high" | You cannot buy at a closing price you have not seen yet | Nothing run | All rules buy at the *next open* after the signal; a "buy at the close" version is reported as a robustness check. Better because every fill uses a price that existed after the decision | Define the fill price before the hypothesis |
+| 4 | Rule B beating Rule A would show that drift is concentrated after the breakout | On every case that breaks out, Rule A's return contains Rule B's return *plus* the run-up. So A beats B automatically on those cases; B can only win overall if non-breakout cases fall a lot | Nothing had been run when B-versus-A was demoted at the design review (02:05). The first replacement (post-breakout minus pre-breakout per day) was run once on the default cell (E00, 02:13) and then itself replaced by the matched-path statistic before the grid or any robustness run | Made the primary test a comparison of the per-day return after the breakout with the normal per-day return over the same days; kept B versus A as a secondary result with control rules. Better because it isolates the only part of the return a breakout trader actually receives and compares like with like | Write down the algebra of a comparison before coding it |
+| 5 | Use "Ticker Events" for delistings | That endpoint only lists symbol changes | Probe | Built the list of dead stocks from the ticker master (active = false) and matched events by company ID (CIK). Better because 21.7% of the final sample is in stocks that no longer trade, which a ticker-based match would have lost | Survivorship protection has to be built, not assumed |
+| 6 | Estimate spreads from tick-level quotes | Far too much data for the machine, and not needed | Probe | Corwin-Schultz (2012) spread estimate from daily highs and lows. Better because it is computable for every event from data already in hand and is a published, validated estimator | Use what is already downloaded |
+| 7 | Use Benzinga earnings data or income statements as a second "surprise" measure | Benzinga returned "not entitled" (HTTP 403) | Probe | Surprise measured by the price reaction only, with two alternative cut-offs as robustness. Better than a non-point-in-time income-statement value, and it is the variable the breakout rule is actually about | Probe entitlements before designing around a dataset |
+| 8 | Splits *and dividends* for price adjustment | The Dividends endpoint works, but over 40-session windows dividends move returns by a few basis points, and the primary statistic compares the same stocks over the same days, so dividends cancel | Nothing run | Split-adjusted price returns only; dividends stated as a limitation. Better because it adjusts for what matters at this horizon and avoids a second adjustment path to validate | Adjust for what matters at the horizon studied |
+
+**Row 4 in plain words.** Of the 14,769 cases with a tradable day-1 open, 8,974 closed above the day-0 high within 10 days and 5,795 never did. On the 8,974, Rule A was already holding the stock while it rose to the breakout (+3.79% on average) and then held the same position as Rule B (+0.34%); so A beat B on almost every one of them. On the 5,795, Rule B earned nothing and Rule A lost 5.10%. Whether "B beats A" therefore depends only on how badly the non-breakout cases do, which says nothing about whether returns arrive late. Section 9.2 shows these numbers by period.
 """},
 
 {"md": """
@@ -110,12 +115,12 @@ funnel = load("sample_funnel.csv"); tv = load("timing_validation.csv", index_col
 print("How the sample was built (number of events remaining after each step):"); display(funnel)
 print("Share of events whose largest daily move falls on day -1, day 0 or day +1:"); display(tv.round(3))
 ''',
- "tables": [{"csv_path": "outputs/tables/sample_funnel.csv"}, {"csv_path": "outputs/tables/timing_validation.csv", "index": False, "fmt": {"peak_on_d0": "{:.3f}", "peak_on_dm1": "{:.3f}", "peak_on_d1": "{:.3f}", "n": "{:.0f}"}}]},
+ "tables": [{"csv_path": "outputs/tables/sample_funnel.csv", "title": "Sample construction funnel"}, {"csv_path": "outputs/tables/timing_validation.csv", "title": "Timing validation", "index": False, "fmt": {"peak_on_d0": "{:.3f}", "peak_on_dm1": "{:.3f}", "peak_on_d1": "{:.3f}", "n": "{:.0f}"}}]},
 
 {"md": """
 ## 6. Which events we study
 
-From 271,534 company-quarter events, 142,358 pass the filters (price at least $5 on day -1, median daily dollar volume over the previous 60 days at least $1 million, at least 120 days of history, not intraday, inside 2005 to mid-2026). Of these, **14,770 are "strong reports"**: their day-0 abnormal return is at or above the 90th percentile of the previous four quarters (the median cut-off is +8.1%). They cover 3,116 different stocks and 86 quarters, and 21.7% of them are stocks that have since been delisted, so the sample is not biased toward survivors.
+Of 316,021 unique company-day-0 filings, 288,469 could be matched to a common-stock price series and 271,534 remain after removing follow-up filings within 20 sessions; 142,358 of those pass the filters (price at least $5 on day -1, median daily dollar volume over the previous 60 days at least $1 million, at least 120 days of history, not intraday, inside 2005 to mid-2026). Of these, **14,770 are "strong reports"**: their day-0 abnormal return is at or above the 90th percentile of the previous four quarters (the median cut-off is +8.1%). One of them has no tradable open on day 1 because its price series ends, so every return table is computed on 14,769 (the same rule removes one and two events from the +5% and two-standard-deviation alternative selections). They cover 3,116 different stocks and 86 quarters, and 21.7% of them are stocks that have since been delisted, so the sample is not biased toward survivors.
 
 Two features matter for everything that follows. First, these are big moves: the median day-0 abnormal return is +12.4% and the median overnight gap is +6.6%. Second, almost half of them close in the top fifth of their day-0 range, so for those the "earnings-day high" is barely above the close and is cleared on day 1 by any small gain.
 """,
@@ -136,12 +141,12 @@ All days are trading days counted from day 0. **H** is the holding length (40 in
 
 * **Rule A:** buy at the open of day 1, sell at the close of day H.
 * **Rule B:** find the first day k (1 to W) whose close is above the day-0 high. Buy at the open of day k+1, sell at the close of day H. If there is no such day, do nothing (return 0).
-* **Rule C (fixed delay):** buy at the open of day 3 no matter what, sell at the close of day H. Day 3 is the median breakout day, so C waits as long as B typically waits, but without looking at prices. If B beats C, the *breakout* matters; if not, only the *waiting* mattered.
+* **Rule C (fixed delay):** the median breakout day in 2005 to 2014 is day 2, so C buys unconditionally at the open of day 3, exactly when Rule B would buy after a day-2 signal, and sells at the close of day H. C waits as long as B typically waits but never looks at prices. If B beats C, the *breakout* matters; if not, only the *waiting* mattered.
 * **Rules D1, D2, D3 (other levels):** like B, but the trigger is a close above the day-0 close (D1), above 1.03 times the day-0 high (D2), or above the day-1 high (D3). If these behave like B, the earnings-day high is not a special level.
 
 All returns are **abnormal returns**: the stock's return minus SPY's return over the same span. Stocks that stop trading inside the window (17 cases) are sold at their last price.
 
-**Toy example.** A stock closes day 0 at $100 with a day-0 high of $104. Rule A buys at $100 at the day-1 open. Suppose the stock closes at $105 on day 3, its first close above $104. Rule B buys at the day-4 open at $105. Both sell at $110 on day 40. Rule A made +10%. Rule B made +4.8%. Rule A's +10% is the run-up (+5%) *combined with* Rule B's +4.8%. This is always true: **whenever the stock breaks out, Rule A earns at least what Rule B earns.** Rule B can only come out ahead on average if the stocks that *never* break out lose a lot, because on those Rule B earns 0 while Rule A takes the loss. That is why "B beats A" cannot, on its own, tell us anything about timing.
+**Toy example.** A stock closes day 0 at $100 with a day-0 high of $104. Rule A buys at $100 at the day-1 open. Suppose the stock closes at $105 on day 3, its first close above $104. Rule B buys at the day-4 open at $105. Both sell at $110 on day 40. Rule A made +10%. Rule B made +4.8%. Rule A's +10% is the run-up (+5%) *combined with* Rule B's +4.8%. In general, on every breakout case Rule A = (1 + run-up from the day-1 open to the entry open) x (1 + Rule B) - 1. The run-up is positive whenever the entry open is above the day-1 open, which is nearly always the case after a close above the day-0 high (it averages +3.79%), so **on breakout cases Rule A almost always earns more than Rule B.** Rule B can only come out ahead on average if the stocks that *never* break out lose a lot, because on those Rule B earns 0 while Rule A takes the loss. That is why "B beats A" cannot, on its own, tell us anything about timing.
 """,
  "code": '''
 # The identity in numbers: A = (1 + run-up) * (1 + B) - 1 on every breakout case.
@@ -163,7 +168,22 @@ print("If the stock never closes above $104: Rule B = 0, Rule A = whatever happe
 
 **Calendar-time check.** I also form daily portfolios: on each trading day, average the abnormal return of every open Rule A position (and separately every Rule B position). This turns overlapping events into one daily series per rule; the difference series is tested with Newey-West standard errors, which correct for the fact that consecutive days are correlated.
 
-**Parameters.** There are two tunable parameters: W (5, 10, 15, 20) and H (20, 40, 60). The default (10, 40) was fixed in advance. The 2005 to 2014 half chooses the best cell (largest lower confidence bound of the primary statistic); the 2015 to 2026 half is then reported for that cell. The whole grid is shown in section 10. All other choices ($5 price, $1M volume, 90th percentile, 60-day windows, 5 basis points commission per side) were set once, by convention, and not tuned. Optimising beyond this would only risk fitting noise.
+**Parameters.** There are two tunable parameters: W (5, 10, 15, 20) and H (20, 40, 60). The default (10, 40) was fixed in advance. The 2005 to 2014 half chooses the best cell (largest lower confidence bound of the primary statistic); the 2015 to 2026 half is then reported for that cell. The whole grid is shown in section 10. All other choices were set once, by convention, before any result, and were not tuned; their sensitivity was checked afterwards (section 11). Optimising beyond this would only risk fitting noise.
+
+| Choice | Value | Why it exists | Values considered | How chosen | Data used | Sensitivity |
+|---|---|---|---|---|---|---|
+| Max wait W | 10 | how long a breakout may take | 5, 10, 15, 20 | default fixed in advance; 2005-2014 picks 15 | selection half only | none: same conclusion in all 12 cells |
+| Holding H | 40 | horizon over which drift is measured | 20, 40, 60 | as above | selection half only | none |
+| "Strong report" cut | trailing-4-quarter 90th percentile of AR0 | defines the event | 85th, 95th; fixed +5%; z-score >= 2 | convention (top decile) | none (a priori) | B minus A between -0.07% and -0.54%; primary within 1 bp/day of base |
+| Minimum price | $5 (day -1, unadjusted) | avoid penny-stock noise | $10 | convention | none | none |
+| Minimum liquidity | median 60-day dollar volume >= $1M | tradability | $5M | convention | none | none |
+| History | >= 120 bars | volatility estimate, no fresh IPOs | not varied | convention | none | not varied |
+| Benchmark | SPY excess | simplicity | not varied | transparency | none | the primary statistic and placebo are benchmark-free |
+| Breakout level | day-0 high | the hypothesis | day-0 close; 1.03 x high; day-1 high (controls) | hypothesis | none | all levels behave alike |
+| Fill | next open after the signal close | attainability | signal close (robustness) | conservatism | none | -0.41% vs -0.34% |
+| Costs | Corwin-Schultz half-spread + 5 bp per side | tradability verdict | not varied | literature | none | reported by liquidity third |
+
+**A note on one table label.** `main_summary_W10_H40.csv` and `stratified_W10_H40.csv` still contain the discarded first statistic, labelled "post minus pre per-day AR (... descriptive only)". It is about -2.3% per day because the pre-breakout days are, by construction, up days. It is kept for transparency and is not the primary test.
 """},
 
 {"md": """
@@ -192,14 +212,14 @@ dec = load("decomposition_W10_H40.csv")
 cols = ["period", "group", "n", "share", "CAR_A", "CAR_B", "run_up_open1_to_entry", "post_entry_leg", "perday_A", "perday_post_entry"]
 display(dec[cols].style.format({"share": "{:.1%}", "CAR_A": "{:+.2%}", "CAR_B": "{:+.2%}", "run_up_open1_to_entry": "{:+.2%}", "post_entry_leg": "{:+.2%}", "perday_A": "{:+.3%}", "perday_post_entry": "{:+.3%}"}, na_rep=""))
 ''',
- "tables": [{"csv_path": "outputs/tables/decomposition_W10_H40.csv", "cols": ["period", "group", "n", "share", "CAR_A", "CAR_B", "run_up_open1_to_entry", "post_entry_leg", "perday_post_entry"], "fmt": {"share": "{:.1%}", "CAR_A": PCT, "CAR_B": PCT, "run_up_open1_to_entry": PCT, "post_entry_leg": PCT, "perday_post_entry": "{:+.3%}"}}]},
+ "tables": [{"csv_path": "outputs/tables/decomposition_W10_H40.csv", "title": "Breakout versus non-breakout cases", "cols": ["period", "group", "n", "share", "CAR_A", "CAR_B", "run_up_open1_to_entry", "post_entry_leg", "perday_post_entry"], "fmt": {"share": "{:.1%}", "CAR_A": PCT, "CAR_B": PCT, "run_up_open1_to_entry": PCT, "post_entry_leg": PCT, "perday_post_entry": "{:+.3%}"}}]},
 
 {"md": """
 ### 9.3 The primary test: is there extra drift after the breakout?
 
-**No.** After the entry, breakout cases earned +0.01% per day, and the matched normal path over the same days earned about the same. The primary statistic is **-0.7 basis points per day (95% CI -3.0 to +1.6)** for 2005 to 2026, -0.0 (-3 to +2) in 2005 to 2014 and -2 (-5 to +2) in 2015 to 2026. Figure 2 shows the daily abnormal returns lined up on the breakout day: a big spike on the breakout day itself (which is what *defines* a breakout), and from the entry open onwards a path that sits on top of the normal one.
+**No.** After the entry, breakout cases earned 0.9 basis points per day above the market; all strong-report cases earned 1.8 basis points per day over the same days. Breakout cases did slightly *worse*, not better. Concretely, breakout cases earned 0.9 basis points per day after the entry, and all strong-report cases earned 1.8 basis points per day over those same days. The primary statistic (the difference) is **-0.9 basis points per day (95% CI -1.5 to -0.2)** for 2005 to 2026, -1.5 (-2.4 to -0.6) in 2005 to 2014 and -0.6 (-1.4 to +0.3) in 2015 to 2026. The primary statistic lives in `outputs/tables/robustness_W10_H40.csv` (rows "base ... | all / selection / holdout", columns PRIMARY_post_minus_matched, PRIMARY_lo, PRIMARY_hi, matched_control_perday) and in `outputs/tables/grid_results.csv`; it is not in `main_summary_W10_H40.csv`. For scale, one basis point per day over the roughly 38 days after a median day-2 breakout is about 0.4% over the whole window. A small negative value is what the short-term reversal literature would predict after a large up day (Jegadeesh 1990; Lehmann 1990). Figure 2 shows the daily abnormal returns lined up on the breakout day: a big spike on the breakout day itself (which is what *defines* a breakout), and from the entry open onwards a path that sits on or just below the normal one.
 
-**How to read Figure 2.** Day 0 on the x-axis is the breakout day k, not the earnings day. The red dot at 0 is huge because a breakout day is by definition a day the stock rose. Everything to the right of the green line is what a Rule B trader actually receives. It is indistinguishable from the grey squares, which show what all strong-report stocks earned on those same days in that same quarter.
+**How to read Figure 2.** Day 0 on the x-axis is the breakout day k, not the earnings day. The red dot at 0 is huge because a breakout day is by definition a day the stock rose. Everything to the right of the green line is what a Rule B trader actually receives. It sits on or just below the grey squares, which show what all strong-report stocks earned on those same days in that same quarter. (Both series in the figure are close-to-close daily returns; the primary statistic in the text uses open-to-close spans for both sides, so the overnight gap into the entry day is excluded from both.)
 """,
  "code": '''
 ba = load("breakout_aligned_means.csv")
@@ -230,13 +250,13 @@ s = load("calendar_time_series_W10_H40.csv", index_col=0)
 fig, ax = plt.subplots(figsize=(9, 4)); ax.plot(s.index, s.rA.cumsum() * 100, label="Rule A book"); ax.plot(s.index, s.rB.cumsum() * 100, label="Rule B book"); ax.plot(s.index, s.d.cumsum() * 100, color="k", label="B minus A")
 ax.set_xlabel("trading-day index (2005 to 2026)"); ax.set_ylabel("cumulative daily abnormal return, %"); ax.legend(); ax.set_title("Figure 6. Calendar-time portfolios"); plt.show()
 ''',
- "tables": [{"csv_path": "outputs/tables/main_summary_W10_H40.csv", "query": "statistic in ['CAR_A (open1->closeH)', 'CAR_B (breakout entry, 0 if flat)', 'B minus A', 'CAR_C fixed delay m', 'C minus A', 'D1 minus A', 'D2 minus A', 'D3 minus A']", "cols": ["period", "statistic", "mean", "ci_lo", "ci_hi", "share_seasons_pos"], "fmt": {"mean": PCT, "ci_lo": PCT, "ci_hi": PCT, "share_seasons_pos": "{:.0%}"}}, {"csv_path": "outputs/tables/calendar_time_W10_H40.csv", "fmt": {"mean_daily_bp": BP, "nw_se_bp": "{:.2f}", "nw_t": "{:.2f}", "ann_sharpe": "{:.2f}"}}],
+ "tables": [{"csv_path": "outputs/tables/main_summary_W10_H40.csv", "title": "Rules A, B, C, D1-D3 by period", "appendix": True, "query": "statistic in ['CAR_A (open1->closeH)', 'CAR_B (breakout entry, 0 if flat)', 'B minus A', 'CAR_C fixed delay m', 'C minus A', 'D1 minus A', 'D2 minus A', 'D3 minus A']", "cols": ["period", "statistic", "mean", "ci_lo", "ci_hi", "share_seasons_pos"], "fmt": {"mean": PCT, "ci_lo": PCT, "ci_hi": PCT, "share_seasons_pos": "{:.0%}"}}, {"csv_path": "outputs/tables/calendar_time_W10_H40.csv", "title": "Calendar-time portfolios (Newey-West)", "appendix": True, "fmt": {"mean_daily_bp": BP, "nw_se_bp": "{:.2f}", "nw_t": "{:.2f}", "ann_sharpe": "{:.2f}"}}],
  "figs": [("outputs/figures/fig6_calendar_time.png", "Figure 6. Cumulative daily abnormal returns of the Rule A and Rule B books and their difference.")]},
 
 {"md": """
 ## 10. Choosing the two parameters
 
-The grid below covers every W and H combination for both halves of the sample. Rule B minus Rule A is negative in all 12 cells in 2005 to 2014 (the interval is entirely below zero in 11 of them) and its interval includes zero in all 12 cells in 2015 to 2026. The primary statistic stays within plus or minus 3 basis points per day of zero everywhere. The selection rule picked W = 15, H = 40 (primary statistic -0.0 bp, CI -2.4 to +2.5, in 2005 to 2014); in 2015 to 2026 that cell gives -1.6 bp (-5.2 to +2.0) and B minus A of +0.03% (-0.63% to +0.72%). **The conclusion does not depend on the parameters.**
+The grid below covers every W and H combination for both halves of the sample. Rule B minus Rule A is negative in all 12 cells in 2005 to 2014 (the interval is entirely below zero in 11 of them) and its interval includes zero in all 12 cells in 2015 to 2026. The primary statistic lies between -1.8 and +0.3 basis points per day across all cells and periods, never significantly positive. The selection rule (largest lower confidence bound in 2005 to 2014) picked W = 20, H = 60 with a primary statistic of -0.9 bp/day (-1.5 to -0.4); in 2015 to 2026 that cell gives -0.1 bp/day (-0.7 to +0.5) and B minus A of +0.17% (-0.58% to +0.91%). **The conclusion does not depend on the parameters.**
 """,
  "code": '''
 g = load("grid_results.csv")
@@ -252,17 +272,19 @@ display(Image(filename=str(F / "fig5_grid_B_minus_A.png")))
 
 Every variant below was run through the same engine and is logged in `logs/experiment_record.csv`, including the ones that made no difference.
 
-* **Ignore day-1 breakouts** (trigger only from day 2): B minus A -0.37%; primary -0.8 bp/day.
-* **Buy at the signal close instead of the next open:** -0.41%; -1.0 bp/day. Faster fills do not rescue Rule B.
-* **Different "strong report" cut-offs:** a fixed +5% (26,611 cases) gives -0.18%; a reaction of at least two standard deviations (35,517 cases) gives -0.07%. Rule A's own return falls to +0.32% and +0.11% in these larger samples.
-* **Include the ambiguous intraday filings:** -0.38%.
-* **Placebo with no news:** run the same rules on the same stocks 60 sessions *before* the earnings day. B minus A is -0.40% and the primary statistic +0.4 bp/day. The B-below-A pattern appears without any news, which confirms it is mechanical.
-* **Mirror image on the short side** (bottom-decile reactions, trigger = close below the day-0 low): -0.50%, primary +0.4 bp/day. A symmetry check only; borrowing costs and short-sale rules are ignored.
-* **Friday announcements** (21.8% of cases): the primary statistic is -4.0 bp/day (-7.2 to -0.5), the opposite sign to the attention story. This is one of many splits, so I report it as a curiosity, not a finding.
+* **Ignore day-1 breakouts** (trigger only from day 2): -0.37%; primary -0.9 bp/day (-1.6 to -0.2).
+* **Buy at the signal close instead of the next open:** -0.41%; primary -1.2 bp/day (-1.8 to -0.5). Faster fills do not rescue Rule B.
+* **Different "strong report" cut-offs:** a fixed +5% (26,610 cases) gives -0.18%; primary -0.7 bp/day (-1.2 to -0.2); a reaction of at least two standard deviations (35,515 cases) gives -0.07%; primary -0.5 bp/day (-0.8 to -0.1). Rule A's own return falls to +0.32% and +0.11% in these larger samples.
+* **Looser or stricter definition** (trailing 85th or 95th percentile instead of the 90th): -0.24%; primary -0.8 bp/day (-1.3 to -0.3); and -0.54%; primary -1.2 bp/day (-2.1 to -0.4).
+* **Stricter filters** (price at least $10; median dollar volume at least $5M): -0.22%; primary -0.7 bp/day (-1.3 to -0.1); and -0.21%; primary -0.8 bp/day (-1.5 to -0.1).
+* **Include the ambiguous intraday filings:** -0.38%; primary -0.8 bp/day (-1.4 to -0.2).
+* **Placebo with no news:** run the same rules on the same stocks 60 sessions *before* the earnings day. B trails A by about the same amount (-0.40%, CI -0.91% to +0.10%) even though "day 0" is an ordinary day with no announcement, and the primary statistic is -0.4 bp/day (-1.2 to +0.3). A gap that appears without news cannot be a news-timing effect.
+* **Mirror image on the short side** (bottom-decile reactions, trigger = close below the day-0 low, returns and control both sign-flipped): -0.50%; primary -1.1 bp/day (-1.9 to -0.3). A symmetry check only; borrowing costs and short-sale rules are ignored.
+* **Friday announcements** (21.8% of cases): the primary statistic is -2.8 bp/day (-4.7 to -0.8), the opposite sign to the attention story, against -0.3 bp/day (-1.1 to +0.4) for Monday to Thursday. This is one of many splits, so I report it as a curiosity, not a finding.
 * **By liquidity** (low / mid / high thirds): B minus A -0.48% / -0.05% / -0.49%. No concentration in illiquid names.
-* **By where the day-0 close sits in its range** (low / mid / high thirds): -0.70% / -0.31% / -0.01%. Rule B's shortfall is largest exactly where the anchor actually binds.
+* **By where the day-0 close sits in its range** (low / mid / high thirds): B minus A -0.70% / -0.31% / -0.01%. Rule B's shortfall is largest exactly where the anchor actually binds.
 
-**Costs.** The Corwin-Schultz estimate of the bid-ask spread has a median of 0.82% (0.73% for the most liquid third, 0.92% for the least liquid). Charging half the spread plus 5 basis points on each side turns Rule A's +0.55% into **-0.52%** (CI -1.55% to +0.52%) and Rule B's +0.21% into -0.45% (-1.01% to +0.14%). The 2005 to 2014 drift (+1.43% gross) would have been roughly break-even after costs; after 2015 there is nothing to trade.
+**Costs.** The Corwin-Schultz estimate of the bid-ask spread has a median of 0.82% and a mean of 0.96% (0.73% median for the most liquid third, 0.92% for the least liquid). Charging half the spread plus 5 basis points on each side removes about 1.06% per round trip and turns Rule A's +0.55% into **-0.52%** (CI -1.55% to +0.52%) and Rule B's +0.21% into -0.45% (-1.01% to +0.14%). By period (same table): in 2005 to 2014 Rule A nets +0.43% (-0.43% to +1.35%), indistinguishable from zero; in 2015 to 2026 it nets -0.97% (-2.37% to +0.45%).
 """,
  "code": '''
 rb = load("robustness_W10_H40.csv"); rb = rb[rb.period == "all"]
@@ -271,7 +293,7 @@ for c in ("PRIMARY_post_minus_matched", "PRIMARY_lo", "PRIMARY_hi"): show[c] = s
 display(show.style.format({"share_entered_B": "{:.0%}", "CAR_A": "{:+.2%}", "CAR_B": "{:+.2%}", "B_minus_A": "{:+.2%}", "B_minus_A_lo": "{:+.2%}", "B_minus_A_hi": "{:+.2%}", "PRIMARY_post_minus_matched": "{:+.1f} bp", "PRIMARY_lo": "{:+.1f}", "PRIMARY_hi": "{:+.1f}"}))
 costs = load("costs_W10_H40.csv"); display(costs[["group", "n", "median_spread", "gross_A", "net_A", "net_A_lo", "net_A_hi", "gross_B", "net_B", "net_B_lo", "net_B_hi"]].style.format({"median_spread": "{:.2%}", "gross_A": "{:+.2%}", "net_A": "{:+.2%}", "net_A_lo": "{:+.2%}", "net_A_hi": "{:+.2%}", "gross_B": "{:+.2%}", "net_B": "{:+.2%}", "net_B_lo": "{:+.2%}", "net_B_hi": "{:+.2%}"}))
 ''',
- "tables": [{"csv_path": "outputs/tables/robustness_W10_H40.csv", "query": "period == 'all'", "cols": ["variant", "n_events", "share_entered_B", "CAR_A", "B_minus_A", "B_minus_A_lo", "B_minus_A_hi", "PRIMARY_post_minus_matched", "PRIMARY_lo", "PRIMARY_hi"], "fmt": {"share_entered_B": "{:.0%}", "CAR_A": PCT, "B_minus_A": PCT, "B_minus_A_lo": PCT, "B_minus_A_hi": PCT, "PRIMARY_post_minus_matched": "{:+.4%}", "PRIMARY_lo": "{:+.4%}", "PRIMARY_hi": "{:+.4%}"}}, {"csv_path": "outputs/tables/costs_W10_H40.csv", "cols": ["group", "n", "median_spread", "gross_A", "net_A", "gross_B", "net_B"], "fmt": {"median_spread": "{:.2%}", "gross_A": PCT, "net_A": PCT, "gross_B": PCT, "net_B": PCT}}]},
+ "tables": [{"csv_path": "outputs/tables/robustness_W10_H40.csv", "title": "Robustness variants (2005-2026)", "appendix": True, "query": "period == 'all'", "cols": ["variant", "n_events", "share_entered_B", "CAR_A", "B_minus_A", "B_minus_A_lo", "B_minus_A_hi", "PRIMARY_post_minus_matched", "PRIMARY_lo", "PRIMARY_hi"], "fmt": {"share_entered_B": "{:.0%}", "CAR_A": PCT, "B_minus_A": PCT, "B_minus_A_lo": PCT, "B_minus_A_hi": PCT, "PRIMARY_post_minus_matched": "{:+.4%}", "PRIMARY_lo": "{:+.4%}", "PRIMARY_hi": "{:+.4%}"}, "rename": {"PRIMARY_post_minus_matched": "primary (per day)", "PRIMARY_lo": "primary lo", "PRIMARY_hi": "primary hi", "share_entered_B": "share entered B"}}, {"csv_path": "outputs/tables/costs_W10_H40.csv", "title": "Trading costs", "appendix": True, "cols": ["group", "n", "median_spread", "gross_A", "net_A", "gross_B", "net_B"], "fmt": {"median_spread": "{:.2%}", "gross_A": PCT, "net_A": PCT, "gross_B": PCT, "net_B": PCT}}]},
 
 {"md": """
 ## 12. Assumptions and limitations
@@ -282,13 +304,19 @@ costs = load("costs_W10_H40.csv"); display(costs[["group", "n", "median_spread",
 * **Costs are estimated**, not observed. The spread proxy is coarse for the least liquid names.
 * **The placebo's Rule A level** (+1.24%) is not meaningful on its own: those stocks were chosen because of a strong reaction that came later. Only the B-versus-A comparison inside the placebo is used.
 * **Effective sample size.** Earnings arrive in four seasons a year, so 86 quarter blocks, not 14,770 cases, determine the width of the confidence intervals.
-* **Ten design choices** are listed in the README's parameter table. Only W and H were tuned, on 2005 to 2014, and reported on 2015 to 2026.
+* **Ten design choices** are listed in the parameter table in section 8. Only W and H were tuned, on 2005 to 2014, and reported on 2015 to 2026.
+* **What the test could detect.** The primary statistic's 95% interval is about 1.3 basis points per day wide, so an extra post-breakout drift of about 0.7 basis points per day (roughly 0.3% over the window) would have been detected; smaller effects cannot be ruled out.
 """},
 
 {"md": """
 ## 13. Conclusion
 
-**The hypothesis is rejected.** Abnormal returns after a close above the earnings-day high are indistinguishable from the normal post-announcement path in every period, every parameter cell and every robustness variant. The rule that waits for the breakout earns less than buying at the next open: clearly so in 2005 to 2014, and roughly zero after. The comparison the proposal put forward (Rule B beats Rule A) is biased against Rule B by construction, and its pattern is reproduced both by triggers that ignore the earnings-day high and by a placebo with no news at all, so even a positive result would not have supported a timing story.
+**The hypothesis is rejected, for four reasons.**
+
+1. **No extra drift after the breakout.** After a stock closes above its earnings-day high, it earns 0.9 basis points per day above the market; all strongly reacting stocks earn 1.8 basis points per day over the same days. The difference is -0.9 bp per day with a 95% interval of -1.5 to -0.2, and it stays within a few basis points of zero in every period and parameter cell and in every pre-specified robustness variant. The one split with an interval away from zero (Friday announcements) has the wrong sign for the hypothesis and is one of many splits. With interval half-widths of about 0.7 basis points per day, the test would have detected an extra drift of roughly 0.3% over the 40-day window.
+2. **Waiting costs money.** Rule B earned 0.34% less than Rule A over 2005 to 2026, 0.92% less in 2005 to 2014 (interval -1.41% to -0.46%, B ahead in only 28% of quarters), and about the same after 2015.
+3. **The earnings-day high is not special.** Triggers at other price levels and a fixed two-day delay behave like Rule B, and B trails A by the same amount on ordinary days with no news. The proposal's test (B beats A) was biased against B by construction, so even a win for B would not have shown that returns arrive late.
+4. **The drift itself is small, old and untradable.** Buying at the next open earned +1.43% over 40 days before 2015 and +0.12% after; estimated round-trip costs of about 1.1% leave +0.43% (CI -0.43% to +1.35%) before 2015 and -0.97% after: nothing distinguishable from zero.
 
 In the language of the brief: for the *timing* claim, "the original result was caused by a methodological issue"; for the drift itself, "the result exists before costs but is not practically tradable", and only before 2015.
 """},
@@ -317,19 +345,20 @@ In the language of the brief: for the *timing* claim, "the original result was c
 * **Calendar-time portfolio:** on each day, the average return of all positions open that day; it turns overlapping events into one daily series.
 * **Newey-West t-statistic:** a t-statistic whose standard error is corrected for correlation between consecutive days.
 * **Corwin-Schultz spread:** an estimate of the bid-ask spread computed only from daily highs and lows.
+* **Point-in-time:** using, for each date, only the information that existed on that date (for example, the price level before later stock splits, or a threshold built from earlier quarters).
 """},
 
 {"md": """
 ## Questions an interviewer may ask, and short answers
 
-1. **Why did Rule B lose to Rule A in 2005 to 2014?** Because on breakout cases A holds B's position plus a +3.3% run-up, and the non-breakout cases (40% of the sample) lost only 2.7% under A in that period; that is not enough for B's zeros to make up the difference. Table 9.2 shows both pieces.
+1. **Why did Rule B lose to Rule A in 2005 to 2014?** Because on breakout cases A holds B's position plus a +3.3% run-up, and the non-breakout cases (40% of the sample) lost only 2.7% under A in that period; that is not enough for B's zeros to make up the difference. The table in section 9.2 shows both pieces.
 2. **Is the result just because breakouts on day 1 are trivial?** No. Excluding day-1 breakouts gives -0.37% (versus -0.34%), and Rule B's shortfall is largest in the cases where the close was far below the high, where the anchor really binds.
 3. **How do you know the primary statistic is not biased by the selection on breakouts?** The post-entry leg starts *after* the breakout day and is compared with what all strong-report stocks earned over the same days in the same quarter. The breakout-day spike itself (Figure 2, day 0) is excluded from both sides.
-4. **What would have convinced you the hypothesis was true?** A primary statistic with a 95% interval above zero in both halves of the sample, plus Rules C and D failing to reproduce it, plus a flat placebo. None of the three happened.
+4. **What would have convinced you the hypothesis was true?** A primary statistic with a 95% interval above zero in both halves of the sample, plus Rules C and D failing to reproduce it, plus a flat placebo. None of the three happened: the statistic is -1.5 bp/day (-2.4 to -0.6) in 2005 to 2014 and -0.6 bp/day (-1.4 to +0.3) in 2015 to 2026.
 5. **Where is the look-ahead in the original proposal?** The within-quarter decile ranking and the "buy at the signal close" rule. Both were replaced before any test was run, and both are logged.
 6. **Could misdated events explain the null?** They add noise but no bias: misdating shifts the anchor and the entry for A and B alike, and the timing validation shows 64% correct dating with most of the rest one day late.
 7. **Why SPY as benchmark and not a size-matched portfolio?** Simplicity and transparency. The primary statistic compares stocks with themselves over the same days, so the benchmark cancels out in the main test; the placebo provides a second benchmark-free check.
-8. **Is anything here tradable?** No. Median round-trip spread costs of about 1% exceed the +0.55% gross return of Rule A; before 2015 the drift was roughly break-even after costs.
+8. **Is anything here tradable?** No. Round-trip costs of about 1.1% exceed the +0.55% gross return of Rule A; before 2015 the drift nets +0.43% (CI -0.43% to +1.35%) after costs, indistinguishable from zero.
 """},
 
 {"md": """
@@ -346,6 +375,8 @@ Frazzini, A. (2006). The disposition effect and underreaction to news. *Journal 
 George, T. and Hwang, C.-Y. (2004). The 52-week high and momentum investing. *Journal of Finance* 59, 2145-2176.
 Grinblatt, M. and Han, B. (2005). Prospect theory, mental accounting, and momentum. *Journal of Financial Economics* 78, 311-339.
 Hirshleifer, D., Lim, S. and Teoh, S. H. (2009). Driven to distraction: extraneous events and underreaction to earnings news. *Journal of Finance* 64, 2289-2325.
+Jegadeesh, N. (1990). Evidence of predictable behavior of security returns. *Journal of Finance* 45, 881-898.
+Lehmann, B. (1990). Fads, martingales, and market efficiency. *Quarterly Journal of Economics* 105, 1-28.
 Huddart, S., Lang, M. and Yetman, M. (2009). Volume and price patterns around a stock's 52-week highs and lows. *Management Science* 55, 16-31.
 Martineau, C. (2022). Rest in peace post-earnings announcement drift. *Critical Finance Review* 11, 613-646.
 

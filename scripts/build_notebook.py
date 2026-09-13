@@ -38,11 +38,20 @@ def md_table(csv_path, cols=None, fmt=None, index=False, max_rows=40, query=None
     return df.to_markdown(index=index)
 
 def build_markdown():
-    parts = [f"# {TITLE}\n"]
+    parts = [f"# {TITLE}\n"]; appendix = []
     for s in SECTIONS:
         if s.get("md"): parts.append(textwrap.dedent(s["md"]).strip() + "\n")
-        for t in s.get("tables", []): parts.append(md_table(**t) + "\n")
+        for t in s.get("tables", []):
+            t = dict(t); title = t.pop("title", pathlib.Path(t["csv_path"]).stem)
+            if t.pop("appendix", False):
+                appendix.append(f"### Table A{len(appendix) + 1}. {title}\n\nSource: `{t['csv_path']}`\n\n" + md_table(**t) + "\n")
+                parts.append(f"*(Full table: Appendix Table A{len(appendix)}, `{t['csv_path']}`.)*\n")
+            else:
+                parts.append(md_table(**t) + "\n")
         for f in s.get("figs", []): parts.append(f"![{f[1]}](../{f[0]})\n*{f[1]}*\n")
+    if appendix:
+        parts.append("## Appendix: full tables\n\nEvery table below is a committed CSV in `outputs/tables/` and is also shown, with the code that loads it, in `notebooks/report.ipynb`.\n")
+        parts.extend(appendix)
     (ROOT / "docs" / "report.md").write_text("\n".join(parts))
 
 if __name__ == "__main__":

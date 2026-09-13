@@ -5,6 +5,7 @@ Writes outputs/probe_access.json for the decision log.
 """
 from __future__ import annotations
 
+import os, pathlib as _pl; os.chdir(_pl.Path(__file__).resolve().parents[1])  # always run from the repo root
 import json
 import pathlib
 import sys

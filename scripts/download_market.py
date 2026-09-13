@@ -2,7 +2,7 @@
 
 - Daily Market Summary, adjusted=false, one call per weekday 2004-01-01 .. END. Unadjusted
   prices are the point-in-time record; we apply split adjustments ourselves from the splits
-  table and validate against a sample of vendor-adjusted bars (tests/test_adjustment.py).
+  table and validate against a sample of vendor-adjusted bars (tests/test_prices.py, tests/test_api_crosscheck.py).
 - Written as one parquet per year under data/raw/grouped/ (float32 prices, int64 volume,
   dictionary-encoded ticker). Completed years are skipped on re-run (resume).
 - Ticker master: /v3/reference/tickers for active=true and active=false, market=stocks,
@@ -13,6 +13,7 @@ Progress goes to logs/download.log. Never prints the key.
 """
 from __future__ import annotations
 
+import os, pathlib as _pl; os.chdir(_pl.Path(__file__).resolve().parents[1])  # always run from the repo root
 import concurrent.futures as cf
 import datetime as dt
 import logging

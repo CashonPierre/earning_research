@@ -1,12 +1,15 @@
 """Stage 8b: export small aggregate tables (no per-security prices) so the notebook report can be
 re-run from the committed outputs without the git-ignored data."""
+import os, pathlib as _pl; os.chdir(_pl.Path(__file__).resolve().parents[1])  # always run from the repo root
 import pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 import numpy as np, pandas as pd
 from pead.backtest import Windows, run_rules, season_bootstrap
 SEL_END = "2014-12-31"; W, H = 10, 40; OUT = pathlib.Path("outputs/tables"); OUT.mkdir(parents=True, exist_ok=True)
 ev = pd.read_parquet("data/processed/events.parquet"); sel = ev[ev.selected].reset_index(drop=True)
-win = Windows(sel); res = run_rules(win, W, H, m_fixed=2); path = win.event_time_path(60)
+import json
+m_fixed = json.load(open("outputs/tables/main_meta_W10_H40.json"))["m_fixed"]
+win = Windows(sel); res = run_rules(win, W, H, m_fixed=m_fixed); path = win.event_time_path(60)
 keep = res.valid_A.to_numpy()  # same filter as run_main: drop events with no bar at open(1)
 sel = sel[keep].reset_index(drop=True); res = res[keep].reset_index(drop=True); path = path[keep]
 q = sel.quarter.to_numpy(); selmask = (sel.d0 <= SEL_END).to_numpy()

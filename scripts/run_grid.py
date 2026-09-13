@@ -1,4 +1,5 @@
 """Stage 5: parameter grid W x H on selection (2005-2014) and hold-out (2015-2026)."""
+import os, pathlib as _pl; os.chdir(_pl.Path(__file__).resolve().parents[1])  # always run from the repo root
 import pathlib, sys, time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 import numpy as np, pandas as pd

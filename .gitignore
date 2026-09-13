@@ -16,3 +16,8 @@ __pycache__/
 .vscode/
 # derived tables that embed licensed prices
 data/processed/
+# notebook artefacts
+.ipynb_checkpoints/
+notebooks/*.html
+# data folder lives on the external SSD (symlink); never commit it
+/data

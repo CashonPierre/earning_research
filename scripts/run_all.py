@@ -1,5 +1,5 @@
 """Run every stage in order; each stage skips work whose outputs already exist."""
-import pathlib, subprocess, sys
+import os, pathlib, subprocess, sys
 PY = sys.executable
 STAGES = [
     ("scripts/download_market.py", ["data/raw/grouped/2026.parquet", "data/raw/tickers.parquet", "data/raw/splits.parquet"]),
@@ -12,10 +12,13 @@ STAGES = [
     ("scripts/make_figures.py", ["outputs/figures/fig6_calendar_time.png"]),
     ("scripts/export_aggregates.py", ["outputs/tables/decomposition_W10_H40.csv"]),
 ]
-force = "--force" in sys.argv
-for cmd, outs in STAGES:
-    if not force and all(pathlib.Path(o).exists() for o in outs):
+os.chdir(pathlib.Path(__file__).resolve().parents[1])
+force = "--force" in sys.argv            # re-run everything, downloads included
+analysis = "--analysis" in sys.argv      # keep downloads and builds, re-run analysis stages (index >= 4)
+for i, (cmd, outs) in enumerate(STAGES):
+    if not (force or (analysis and i >= 4)) and all(pathlib.Path(o).exists() for o in outs):
         print(f"skip {cmd} (outputs exist)"); continue
     print(f"run  {cmd}", flush=True)
     subprocess.run([PY, *cmd.split()], check=True)
 print("all stages complete")
+print("Usage: run_all.py [--analysis | --force]. On a fresh clone the committed outputs make every stage skip; use --analysis to recompute from data/processed, --force to redo downloads too.")
