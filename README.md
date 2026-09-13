@@ -1,6 +1,6 @@
 # PEAD breakout timing: does post-earnings drift wait for the earnings-day high?
 
-Round 1 research assessment for the quant team. Research question, data, method, results and an honest conclusion are in **[docs/report.md](docs/report.md)** (also `docs/report.pdf`). The proposal as submitted is in `docs/proposal_as_submitted.md`; the execution plan written after the design review is `docs/PLAN.md`.
+Round 1 research assessment for the quant team. Research question, data, method, results and an honest conclusion are in **[docs/report.md](docs/report.md)** (also `docs/report.pdf`), and in interactive form with the code that draws every table and figure in **[notebooks/report.ipynb](notebooks/report.ipynb)**. Both are generated from one source of text (`scripts/report_content.py`) so they cannot disagree. The proposal as submitted is in `docs/proposal_as_submitted.md`; the execution plan written after the design review is `docs/PLAN.md`.
 
 **One-line answer.** After top-decile earnings-day reactions, abnormal returns after a close above the earnings-day high are indistinguishable from the unconditional path (-0.7 bp/day, 95% CI [-3.0, +1.6]); a rule that waits for the breakout earns less than buying at the next open (-0.92% in 2005-2014, about zero after). The hypothesis is rejected; the small early-sample drift is not tradable net of spreads.
 
@@ -17,6 +17,10 @@ src/pead/            library code
   backtest.py        vectorised rules A/B/C/D, legs, calendar-time series, bootstrap, Newey-West
   analysis.py        matched-path primary statistic and summary helpers
 scripts/             stage scripts (run in order by scripts/run_all.py)
+  report_content.py  the report text, tables and figure specs (single source)
+  build_notebook.py  executes notebooks/report.ipynb and writes docs/report.md from it
+  render_report.py   docs/report.md -> report.html (figures embedded) -> report.pdf via Chrome
+notebooks/report.ipynb  executed notebook report (renders on GitHub; needs only outputs/)
 tests/               pytest data-quality and no-leakage checks
 outputs/tables/      every table cited in the report (CSV)
 outputs/figures/     figures
@@ -43,7 +47,7 @@ The key is read only from the environment (via the git-ignored `.env`), sent onl
 .venv/bin/python scripts/run_all.py
 ```
 
-Stages (each is idempotent and skips existing outputs): `download_market.py` (Daily Market Summary 2004-2026 unadjusted, All Tickers, Splits; ~6,000 calls, ~30 min), `download_edgar.py` (SEC EDGAR submissions for 9,679 CIKs, ~30 min at 9 req/s), `build_panel.py`, `build_events.py`, `run_main.py 10 40`, `run_grid.py`, `run_robustness.py`, `make_figures.py`. Total runtime about 70 minutes, peak RAM about 3 GB, disk about 2 GB. `scripts/probe_access.py` records which endpoints the account can reach.
+Stages (each is idempotent and skips existing outputs): `download_market.py` (Daily Market Summary 2004-2026 unadjusted, All Tickers, Splits; ~6,000 calls, ~30 min), `download_edgar.py` (SEC EDGAR submissions for 9,679 CIKs, ~30 min at 9 req/s), `build_panel.py`, `build_events.py`, `run_main.py 10 40`, `run_grid.py`, `run_robustness.py`, `make_figures.py`, `export_aggregates.py`. Then `build_notebook.py` re-executes the notebook and rewrites `docs/report.md` from the committed tables only (no licensed data needed), and `render_report.py` produces the HTML and PDF. Total runtime about 70 minutes, peak RAM about 3 GB, disk about 2 GB. `scripts/probe_access.py` records which endpoints the account can reach.
 
 Tests: `.venv/bin/python -m pytest -q` (set `RUN_API_TESTS=1` to include the live cross-check of our split adjustment against vendor-adjusted bars).
 

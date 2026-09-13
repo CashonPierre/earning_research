@@ -1,0 +1,17 @@
+statistic,value
+n_selected_events,14769.0
+n_tickers,3116.0
+n_quarters,86.0
+share_amc,0.5483106506872503
+share_friday_day0,0.21755027422303475
+median_ar0,0.12381702661514282
+mean_ar0,0.1446473034962278
+median_threshold,0.08133708238601686
+median_overnight_gap,0.06581199169158936
+share_close_in_top_fifth_of_range,0.4745074141783465
+median_dollar_volume_60d_musd,13.365409851074219
+median_price_day_minus1,26.350000381469727
+share_events_in_now_delisted_tickers,0.21694088970140157
+share_breakout_within_W,0.6076240774595436
+share_day1_breakouts_among_breakouts,0.4489636728326276
+n_early_exit_delisted_in_window,17.0

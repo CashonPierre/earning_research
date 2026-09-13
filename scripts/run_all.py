@@ -10,6 +10,7 @@ STAGES = [
     ("scripts/run_grid.py", ["outputs/tables/grid_results.csv"]),
     ("scripts/run_robustness.py", ["outputs/tables/robustness_W10_H40.csv"]),
     ("scripts/make_figures.py", ["outputs/figures/fig6_calendar_time.png"]),
+    ("scripts/export_aggregates.py", ["outputs/tables/decomposition_W10_H40.csv"]),
 ]
 force = "--force" in sys.argv
 for cmd, outs in STAGES:
