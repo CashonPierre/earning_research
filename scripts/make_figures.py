@@ -54,7 +54,7 @@ for ax, per in zip(axes, ("selection_2005_2014", "holdout_2015_2026")):
     im = ax.imshow(pv.values, cmap="RdBu", vmin=-1.5, vmax=1.5, aspect="auto"); ax.set_xticks(range(len(pv.columns))); ax.set_xticklabels(pv.columns); ax.set_yticks(range(len(pv.index))); ax.set_yticklabels(pv.index)
     for i in range(pv.shape[0]):
         for j in range(pv.shape[1]): ax.text(j, i, f"{pv.values[i, j]:+.2f}", ha="center", va="center", fontsize=9)
-    ax.set_xlabel("holding length H"); ax.set_ylabel("max wait W"); ax.set_title(f"Rule B minus Rule A, % ({per})")
+    ax.set_xlabel("holding length H"); ax.set_ylabel("max wait W"); ax.set_title("Rule B minus Rule A, %  (" + per.replace("selection_", "").replace("holdout_", "").replace("_", " to ") + ")", fontsize=10)
 fig.colorbar(im, ax=axes, shrink=0.8); fig.savefig(FIG / "fig5_grid_B_minus_A.png", dpi=150, bbox_inches="tight"); plt.close(fig)
 # 6. calendar-time cumulative
 ct = pd.read_csv("outputs/tables/calendar_time_series_W10_H40.csv", index_col=0)
@@ -62,6 +62,6 @@ cal = pd.DatetimeIndex(sorted(pd.read_parquet("data/processed/panel.parquet", co
 ct["date"] = cal[ct.index.to_numpy()]
 fig, ax = plt.subplots(figsize=(8, 4.5))
 for s, lab, c in (("rA", "Rule A book", "tab:blue"), ("rB", "Rule B book", "tab:red"), ("d", "B minus A", "k")): ax.plot(ct.date, ct[s].cumsum() * 100, color=c, label=lab)
-ax.axhline(0, color="gray", lw=0.8); ax.set_ylabel("cumulative daily abnormal return, % (equal-weight, days with >= 10 positions)"); ax.legend(); ax.set_title("Calendar-time portfolios (W=10, H=40)")
+ax.axhline(0, color="gray", lw=0.8); ax.set_ylabel("cumulative daily abnormal return, %"); ax.legend(); ax.set_title("Calendar-time portfolios (W=10, H=40), equal-weight, days with >= 10 positions")
 fig.tight_layout(); fig.savefig(FIG / "fig6_calendar_time.png", dpi=150); plt.close(fig)
 print("figures written:", sorted(p.name for p in FIG.glob("*.png")))
