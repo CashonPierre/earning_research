@@ -18,7 +18,7 @@ PRICE_COLS = ("open", "high", "low", "close", "vwap")
 
 
 def load_grouped(years: Iterable[int] | None = None, columns: list[str] | None = None) -> pd.DataFrame:
-    files = sorted((RAW / "grouped").glob("*.parquet"))
+    files = sorted(p for p in (RAW / "grouped").glob("*.parquet") if not p.name.startswith("._"))  # skip ExFAT/AppleDouble sidecars
     if years is not None:
         ys = {int(y) for y in years}
         files = [f for f in files if int(f.stem) in ys]

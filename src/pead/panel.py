@@ -40,7 +40,7 @@ def build_panel(out: pathlib.Path = PROC / "panel.parquet") -> pd.DataFrame:
     cs = common_stock_master()
     keep = set(cs["ticker"]) | {"SPY"}
     frames = []
-    for f in sorted((RAW / "grouped").glob("*.parquet")):
+    for f in sorted(p for p in (RAW / "grouped").glob("*.parquet") if not p.name.startswith("._")):  # skip ExFAT/AppleDouble sidecars
         t = pq.read_table(f, columns=["ticker", "date", "open", "high", "low", "close", "volume", "vwap"]).to_pandas()
         t["ticker"] = t["ticker"].astype(str)
         t = t[t["ticker"].isin(keep)]
