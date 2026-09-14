@@ -23,13 +23,16 @@ If drift arrives only after the breakout, B should earn more than A. But look at
 
 | Day | Price | What happens |
 |---|---|---|
-| Earnings day | jumps, trades as high as 104 during the day, closes at 100 | the "earnings-day high" is 104 |
+| Day -1 close | 90 | the day before the report |
+| Day 0 (earnings day) | opens up, trades as high as 104, closes at 100 | reaction +11%; the "earnings-day high" is 104 |
 | Day 1 open | 100 | **A buys** (the stock opens where it closed) |
-| Day 3 close | 105 | first close above 104 |
+| Day 2 close | 102 | still below 104, B waits |
+| Day 3 close | 105 | first close above 104: B's signal |
 | Day 4 open | 105 | **B buys** |
 | Day 40 close | 110 | both sell |
 
-A makes +10%. B makes +4.8%.
+A makes +10% (100 to 110). B makes +4.8% (105 to 110). The figure shows the same path.
+
 
 ### Why Rule A must beat Rule B on breakout cases
 
@@ -40,6 +43,9 @@ On any case where the stock breaks out, both rules hold the same position from B
 B buys only after a close *above the day-0 high*, and A bought at the day-1 open, which is almost always *below* that high. So the run-up is positive in 88% of breakout cases (average +3.8%), and A's return is larger than B's on almost every one of them. In the example: (1 + 5%) x (1 + 4.8%) - 1 = 10%.
 
 B can therefore only win *on average* if the stocks that *never* break out fall a lot, because on those B earns 0 while A takes the loss. In our data, 61% of cases break out (A +4.2%, B +0.3%) and 39% do not (A -5.1%, B 0). "B beats A" is a statement about the losers, not about *when* drift arrives. This trap shaped the whole design: the main test in section 6 compares only the part of the return that a breakout trader actually receives.
+
+![Figure 0. The toy example: where Rule A and Rule B buy, and the run-up only A holds.](../outputs/figures/fig0_toy_example.png)
+*Figure 0. The toy example: where Rule A and Rule B buy, and the run-up only A holds.*
 
 ## 3. Data
 
