@@ -188,6 +188,8 @@ Every check ran through the same code and is logged in `logs/experiment_record.c
 | Least / middle / most liquid third | -0.48% / -0.05% / -0.49% | | not an illiquid-stock effect |
 | Close near day-0 low / middle / high | -0.70% / -0.31% / -0.01% | | B loses most where the high really binds |
 
+**Does a longer consolidation mean more drift after the breakout?** No. Splitting breakout cases by how many days they took to break out: after a day-1 breakout, 1.4 bp a day versus 1.4 for the normal path (difference -0.0, range -1.3 to +1.3); days 2 to 3, 0.1 versus 1.6 (-1.5, range -3.0 to -0.1); days 4 to 6, 2.2 versus 2.3 (-0.2, range -2.1 to +1.8); days 7 to 10, -0.9 versus 2.6 (-3.5, range -6.4 to -0.7). Holding for two or three times the consolidation length instead of a fixed 40 days (average 11 to 13 days held) gives -2.0 and -2.1 bp a day against the normal path (ranges -3.6 to -0.5 and -3.5 to -0.8). Longer consolidations do worse, not better.
+
 **Costs.** Estimated bid-ask spread (from daily highs and lows): median 0.82%, mean 0.96%. Half the spread plus 5 bp per side is about 1.06% per round trip.
 
 | | Before costs | After costs |
@@ -287,31 +289,37 @@ Every table below is a committed CSV in `outputs/tables/` and is also shown, wit
 
 Source: `outputs/tables/robustness_W10_H40.csv`
 
-| variant                                                     |   cases |    B minus A |          lo |          hi |   extra drift/day |          lo. |          hi. |
-|:------------------------------------------------------------|--------:|-------------:|------------:|------------:|------------------:|-------------:|-------------:|
-| base top-decile trailing threshold                          |   14769 | -0.00338752  | -0.00872638 | 0.00201595  |      -8.54602e-05 | -0.000151757 | -1.95192e-05 |
-| grid-selected cell W=20 H=60                                |   14769 | -0.00106196  | -0.00643875 | 0.00442777  |      -3.68348e-05 | -8.32195e-05 |  7.45476e-06 |
-| trigger from day 2 (exclude day-1 breakouts)                |   14769 | -0.00370174  | -0.00936693 | 0.00205901  |      -9.44503e-05 | -0.000162851 | -2.41837e-05 |
-| market-on-close entry for signal rules                      |   14769 | -0.00407551  | -0.00934094 | 0.00133447  |      -0.00011566  | -0.000182208 | -5.02454e-05 |
-| selection: fixed AR0 >= 5%                                  |   26610 | -0.00183616  | -0.00653123 | 0.00290047  |      -7.18412e-05 | -0.000119879 | -2.3031e-05  |
-| selection: z0 >= 2                                          |   35515 | -0.000669464 | -0.00442222 | 0.00343747  |      -4.67411e-05 | -7.85392e-05 | -1.27018e-05 |
-| intraday filings included                                   |   16025 | -0.00381332  | -0.0087933  | 0.00123643  |      -8.10377e-05 | -0.000141404 | -2.13777e-05 |
-| placebo: pseudo day 0 = 60 sessions before the event        |   14744 | -0.00402525  | -0.00905147 | 0.000984825 |      -4.34127e-05 | -0.000115132 |  3.00655e-05 |
-| short-side mirror (bottom decile, close < day-0 low), gross |   14767 | -0.00500591  | -0.00979412 | 5.96633e-05 |      -0.000108976 | -0.000185794 | -3.31379e-05 |
-| selection: overnight gap-up >= 2 std                        |   25776 | -0.00032901  | -0.00497556 | 0.0047775   |      -6.91324e-05 | -0.00011531  | -2.4318e-05  |
-| selection: overnight gap-up >= 5%                           |   18173 | -0.00242205  | -0.00841828 | 0.00366927  |      -0.000107038 | -0.000175065 | -4.12279e-05 |
-| selection: trailing 85th percentile                         |   21978 | -0.002394    | -0.0072423  | 0.00257764  |      -7.86907e-05 | -0.000130349 | -2.55322e-05 |
-| selection: trailing 95th percentile                         |    7561 | -0.00539022  | -0.0110199  | 0.000391727 |      -0.000121054 | -0.000207049 | -3.86035e-05 |
-| filter: price >= $10 on day -1                              |   12624 | -0.0022306   | -0.00669892 | 0.00245388  |      -7.0377e-05  | -0.000127282 | -1.37012e-05 |
-| filter: median dollar volume >= $5M                         |   10816 | -0.00209579  | -0.00731453 | 0.00332758  |      -7.69025e-05 | -0.000148625 | -7.15867e-06 |
-| Friday day 0                                                |    3213 | -0.00162313  | -0.00767055 | 0.00420494  |      -0.000281813 | -0.000473176 | -7.73107e-05 |
-| Mon-Thu day 0                                               |   11556 | -0.00387809  | -0.00942435 | 0.00176763  |      -3.4018e-05  | -0.000111942 |  4.05567e-05 |
-| liquidity tercile low                                       |    4924 | -0.00477998  | -0.0119341  | 0.00220579  |      -3.45304e-05 | -0.000189127 |  0.000127384 |
-| liquidity tercile mid                                       |    4923 | -0.000508767 | -0.00708132 | 0.00603329  |      -0.000100306 | -0.000261867 |  5.95112e-05 |
-| liquidity tercile high                                      |    4922 | -0.00487383  | -0.00964334 | 0.000270814 |      -0.000118715 | -0.000280031 |  5.15665e-05 |
-| range-placement tercile low                                 |    4924 | -0.00695953  | -0.0148437  | 0.000909633 |      -0.000182511 | -0.000354187 | -1.23467e-05 |
-| range-placement tercile mid                                 |    4923 | -0.00314292  | -0.00854236 | 0.00234558  |       2.59475e-05 | -0.000118675 |  0.000176697 |
-| range-placement tercile high                                |    4922 | -5.87124e-05 | -0.00456996 | 0.00458003  |      -0.000121153 | -0.000258413 |  6.61162e-06 |
+| variant                                                     |   cases |     B minus A |           lo |            hi |   extra drift/day |          lo. |          hi. |
+|:------------------------------------------------------------|--------:|--------------:|-------------:|--------------:|------------------:|-------------:|-------------:|
+| base top-decile trailing threshold                          |   14769 |  -0.00338752  |  -0.00872638 |   0.00201595  |      -8.54602e-05 | -0.000151757 | -1.95192e-05 |
+| grid-selected cell W=20 H=60                                |   14769 |  -0.00106196  |  -0.00643875 |   0.00442777  |      -3.68348e-05 | -8.32195e-05 |  7.45476e-06 |
+| trigger from day 2 (exclude day-1 breakouts)                |   14769 |  -0.00370174  |  -0.00936693 |   0.00205901  |      -9.44503e-05 | -0.000162851 | -2.41837e-05 |
+| market-on-close entry for signal rules                      |   14769 |  -0.00407551  |  -0.00934094 |   0.00133447  |      -0.00011566  | -0.000182208 | -5.02454e-05 |
+| selection: fixed AR0 >= 5%                                  |   26610 |  -0.00183616  |  -0.00653123 |   0.00290047  |      -7.18412e-05 | -0.000119879 | -2.3031e-05  |
+| selection: z0 >= 2                                          |   35515 |  -0.000669464 |  -0.00442222 |   0.00343747  |      -4.67411e-05 | -7.85392e-05 | -1.27018e-05 |
+| intraday filings included                                   |   16025 |  -0.00381332  |  -0.0087933  |   0.00123643  |      -8.10377e-05 | -0.000141404 | -2.13777e-05 |
+| placebo: pseudo day 0 = 60 sessions before the event        |   14744 |  -0.00402525  |  -0.00905147 |   0.000984825 |      -4.34127e-05 | -0.000115132 |  3.00655e-05 |
+| short-side mirror (bottom decile, close < day-0 low), gross |   14767 |  -0.00500591  |  -0.00979412 |   5.96633e-05 |      -0.000108976 | -0.000185794 | -3.31379e-05 |
+| selection: overnight gap-up >= 2 std                        |   25776 |  -0.00032901  |  -0.00497556 |   0.0047775   |      -6.91324e-05 | -0.00011531  | -2.4318e-05  |
+| selection: overnight gap-up >= 5%                           |   18173 |  -0.00242205  |  -0.00841828 |   0.00366927  |      -0.000107038 | -0.000175065 | -4.12279e-05 |
+| selection: trailing 85th percentile                         |   21978 |  -0.002394    |  -0.0072423  |   0.00257764  |      -7.86907e-05 | -0.000130349 | -2.55322e-05 |
+| selection: trailing 95th percentile                         |    7561 |  -0.00539022  |  -0.0110199  |   0.000391727 |      -0.000121054 | -0.000207049 | -3.86035e-05 |
+| filter: price >= $10 on day -1                              |   12624 |  -0.0022306   |  -0.00669892 |   0.00245388  |      -7.0377e-05  | -0.000127282 | -1.37012e-05 |
+| filter: median dollar volume >= $5M                         |   10816 |  -0.00209579  |  -0.00731453 |   0.00332758  |      -7.69025e-05 | -0.000148625 | -7.15867e-06 |
+| Friday day 0                                                |    3213 |  -0.00162313  |  -0.00767055 |   0.00420494  |      -0.000281813 | -0.000473176 | -7.73107e-05 |
+| Mon-Thu day 0                                               |   11556 |  -0.00387809  |  -0.00942435 |   0.00176763  |      -3.4018e-05  | -0.000111942 |  4.05567e-05 |
+| liquidity tercile low                                       |    4924 |  -0.00477998  |  -0.0119341  |   0.00220579  |      -3.45304e-05 | -0.000189127 |  0.000127384 |
+| liquidity tercile mid                                       |    4923 |  -0.000508767 |  -0.00708132 |   0.00603329  |      -0.000100306 | -0.000261867 |  5.95112e-05 |
+| liquidity tercile high                                      |    4922 |  -0.00487383  |  -0.00964334 |   0.000270814 |      -0.000118715 | -0.000280031 |  5.15665e-05 |
+| range-placement tercile low                                 |    4924 |  -0.00695953  |  -0.0148437  |   0.000909633 |      -0.000182511 | -0.000354187 | -1.23467e-05 |
+| range-placement tercile mid                                 |    4923 |  -0.00314292  |  -0.00854236 |   0.00234558  |       2.59475e-05 | -0.000118675 |  0.000176697 |
+| range-placement tercile high                                |    4922 |  -5.87124e-05 |  -0.00456996 |   0.00458003  |      -0.000121153 | -0.000258413 |  6.61162e-06 |
+| consolidation k = 1                                         |    4029 |  -0.0366402   |  -0.0387613  |  -0.0344788   |      -2.21619e-06 | -0.000129808 |  0.000125457 |
+| consolidation k = 2-3                                       |    2440 |  -0.0411282   |  -0.0436196  |  -0.0386792   |      -0.00015318  | -0.000297563 | -7.3682e-06  |
+| consolidation k = 4-6                                       |    1462 |  -0.0378836   |  -0.0406723  |  -0.0350623   |      -1.58716e-05 | -0.000206041 |  0.000177637 |
+| consolidation k = 7-10                                      |    1043 |  -0.0405384   |  -0.0451357  |  -0.0360969   |      -0.000346143 | -0.000640934 | -6.5485e-05  |
+| hold 2x consolidation days after entry (10..50)             |    8974 | nan           | nan          | nan           |      -0.000202579 | -0.000359685 | -4.90009e-05 |
+| hold 3x consolidation days after entry (10..50)             |    8974 | nan           | nan          | nan           |      -0.000212117 | -0.000348267 | -7.5908e-05  |
 
 ### Table A2. Costs
 

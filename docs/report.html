@@ -543,6 +543,7 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 </tr>
 </tbody>
 </table>
+<p><strong>Does a longer consolidation mean more drift after the breakout?</strong> No. Splitting breakout cases by how many days they took to break out: after a day-1 breakout, 1.4 bp a day versus 1.4 for the normal path (difference -0.0, range -1.3 to +1.3); days 2 to 3, 0.1 versus 1.6 (-1.5, range -3.0 to -0.1); days 4 to 6, 2.2 versus 2.3 (-0.2, range -2.1 to +1.8); days 7 to 10, -0.9 versus 2.6 (-3.5, range -6.4 to -0.7). Holding for two or three times the consolidation length instead of a fixed 40 days (average 11 to 13 days held) gives -2.0 and -2.1 bp a day against the normal path (ranges -3.6 to -0.5 and -3.5 to -0.8). Longer consolidations do worse, not better.</p>
 <p><strong>Costs.</strong> Estimated bid-ask spread (from daily highs and lows): median 0.82%, mean 0.96%. Half the spread plus 5 bp per side is about 1.06% per round trip.</p>
 <table>
 <thead>
@@ -1012,6 +1013,66 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 <td style="text-align: right;">-0.000121153</td>
 <td style="text-align: right;">-0.000258413</td>
 <td style="text-align: right;">6.61162e-06</td>
+</tr>
+<tr>
+<td style="text-align: left;">consolidation k = 1</td>
+<td style="text-align: right;">4029</td>
+<td style="text-align: right;">-0.0366402</td>
+<td style="text-align: right;">-0.0387613</td>
+<td style="text-align: right;">-0.0344788</td>
+<td style="text-align: right;">-2.21619e-06</td>
+<td style="text-align: right;">-0.000129808</td>
+<td style="text-align: right;">0.000125457</td>
+</tr>
+<tr>
+<td style="text-align: left;">consolidation k = 2-3</td>
+<td style="text-align: right;">2440</td>
+<td style="text-align: right;">-0.0411282</td>
+<td style="text-align: right;">-0.0436196</td>
+<td style="text-align: right;">-0.0386792</td>
+<td style="text-align: right;">-0.00015318</td>
+<td style="text-align: right;">-0.000297563</td>
+<td style="text-align: right;">-7.3682e-06</td>
+</tr>
+<tr>
+<td style="text-align: left;">consolidation k = 4-6</td>
+<td style="text-align: right;">1462</td>
+<td style="text-align: right;">-0.0378836</td>
+<td style="text-align: right;">-0.0406723</td>
+<td style="text-align: right;">-0.0350623</td>
+<td style="text-align: right;">-1.58716e-05</td>
+<td style="text-align: right;">-0.000206041</td>
+<td style="text-align: right;">0.000177637</td>
+</tr>
+<tr>
+<td style="text-align: left;">consolidation k = 7-10</td>
+<td style="text-align: right;">1043</td>
+<td style="text-align: right;">-0.0405384</td>
+<td style="text-align: right;">-0.0451357</td>
+<td style="text-align: right;">-0.0360969</td>
+<td style="text-align: right;">-0.000346143</td>
+<td style="text-align: right;">-0.000640934</td>
+<td style="text-align: right;">-6.5485e-05</td>
+</tr>
+<tr>
+<td style="text-align: left;">hold 2x consolidation days after entry (10..50)</td>
+<td style="text-align: right;">8974</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">-0.000202579</td>
+<td style="text-align: right;">-0.000359685</td>
+<td style="text-align: right;">-4.90009e-05</td>
+</tr>
+<tr>
+<td style="text-align: left;">hold 3x consolidation days after entry (10..50)</td>
+<td style="text-align: right;">8974</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">-0.000212117</td>
+<td style="text-align: right;">-0.000348267</td>
+<td style="text-align: right;">-7.5908e-05</td>
 </tr>
 </tbody>
 </table>

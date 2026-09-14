@@ -65,6 +65,36 @@ for exp_id, col, src in (("R11", "liquidity tercile", pd.qcut(w_base.ev.med60_dv
     for g in ("low", "mid", "high"):
         mask = src == g; r = cell_stats(w_base, res_base[mask[res_base.index]], H, f"{col} {g} | all", {"variant": f"{col} {g}", "period": "all", "W": W, "H": H}); rows.append(r); parts.append(f"{g}: B-A {r['B_minus_A']:+.4f}, entered {r['share_entered_B']:.2f}")
     record(exp_id, "where does B's shortfall concentrate?", "base events split in thirds", "2005-2026", col, "base rules", f"W={W},H={H}", "; ".join(parts), "yes", "heterogeneity reported in full")
+# ---- does longer consolidation help? (candidate's question)
+def hold_variable(w, res, mult=3, lo=10, hi=50):
+    """Hold for mult x consolidation days after the breakout entry (clamped), instead of a fixed H.
+    Returns the season-bootstrapped primary statistic (post-entry per-day AR minus the matched same-span path)."""
+    E = len(w.ev); k = res.k_B.to_numpy(); ent = res.entry_B.to_numpy(); has = ~np.isnan(ent)
+    L = np.clip(mult * np.nan_to_num(k, nan=1), lo, hi); x = np.minimum(60, np.nan_to_num(ent, nan=1) + L - 1).astype(int)
+    post = np.full(len(res), np.nan); ctrl = np.full(len(res), np.nan)
+    q_all = w.ev.quarter.to_numpy(); idx = res.index.to_numpy(); cache = {}
+    for i in np.where(has)[0]:
+        e, xx = int(ent[i]), int(x[i])
+        if (e, xx) not in cache:
+            cache[(e, xx)] = pd.Series(w.span_ab(np.full(E, float(e)), xx) / (xx - e + 1)).groupby(q_all).mean()
+        ctrl[i] = cache[(e, xx)].get(q_all[idx[i]], np.nan)
+    for xx in np.unique(x[has]):
+        m = has & (x == xx); ee = np.full(E, np.nan); ee[idx[m]] = ent[m]; sp = w.span_ab(ee, int(xx)); post[m] = sp[idx[m]] / (xx - ent[m] + 1)
+    b = season_bootstrap(post - ctrl, res.quarter.to_numpy())
+    return b, float(np.nanmean(post) * 1e4), float(np.nanmean(ctrl) * 1e4), float(np.nanmean(x[has] - ent[has] + 1))
+kb = res_base.k_B.to_numpy(); buckets = (("k = 1", kb == 1), ("k = 2-3", (kb >= 2) & (kb <= 3)), ("k = 4-6", (kb >= 4) & (kb <= 6)), ("k = 7-10", (kb >= 7) & (kb <= 10)))
+parts = []
+for lab, m in buckets:
+    r = cell_stats(w_base, res_base[m], H, f"consolidation {lab} | all", {"variant": f"consolidation {lab}", "period": "all", "W": W, "H": H}); rows.append(r)
+    parts.append(f"{lab}: n={r['n_events']}, post {r['perday_post']*1e4:+.1f} vs matched {r['matched_control_perday']*1e4:+.1f} bp/d, diff {r['PRIMARY_post_minus_matched']*1e4:+.1f} [{r['PRIMARY_lo']*1e4:+.1f},{r['PRIMARY_hi']*1e4:+.1f}]")
+    print(f"consolidation {lab}: {parts[-1]}")
+record("R19", "does longer consolidation before the breakout mean more drift after it?", "base breakout cases split by breakout day k", "2005-2026", "k_B", "base rules, W=10, H=40", "buckets 1 / 2-3 / 4-6 / 7-10", "; ".join(parts), "yes", "heterogeneity by consolidation length, reported in full")
+for mult in (2, 3):
+    b, pp, cc, avgL = hold_variable(w_base, res_base, mult=mult)
+    lab = f"hold {mult}x consolidation days after entry (10..50)"
+    rows.append({"label": lab + " | all", "variant": lab, "period": "all", "W": W, "H": "variable", "n_events": int(res_base.entered_B.sum()), "share_entered_B": float(res_base.entered_B.mean()), "perday_post": pp / 1e4, "matched_control_perday": cc / 1e4, "PRIMARY_post_minus_matched": b["point"], "PRIMARY_lo": b["ci_lo"], "PRIMARY_hi": b["ci_hi"], "avg_hold_days": avgL})
+    print(f"{lab}: post {pp:+.1f} vs matched {cc:+.1f} bp/d, diff {b['point']*1e4:+.1f} [{b['ci_lo']*1e4:+.1f},{b['ci_hi']*1e4:+.1f}], avg hold {avgL:.1f} days")
+    record(f"R2{mult-2}", "hold proportional to consolidation length", "base breakout cases", "2005-2026", "k_B", f"enter open(k+1), hold {mult}k days (min 10, max 50), exit close", f"W={W}", f"post {pp:+.1f} vs matched {cc:+.1f} bp/d; diff {b['point']*1e4:+.1f} [{b['ci_lo']*1e4:+.1f},{b['ci_hi']*1e4:+.1f}]; avg hold {avgL:.0f} d", "yes", "candidate-proposed variant; no improvement over the normal path")
 # ---- costs on base cell
 cs_spread = w_base.corwin_schultz()
 res = res_base.copy(); res["spread"] = cs_spread[res.index]

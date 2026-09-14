@@ -211,6 +211,8 @@ Every check ran through the same code and is logged in `logs/experiment_record.c
 | Least / middle / most liquid third | -0.48% / -0.05% / -0.49% | | not an illiquid-stock effect |
 | Close near day-0 low / middle / high | -0.70% / -0.31% / -0.01% | | B loses most where the high really binds |
 
+**Does a longer consolidation mean more drift after the breakout?** No. Splitting breakout cases by how many days they took to break out: after a day-1 breakout, 1.4 bp a day versus 1.4 for the normal path (difference -0.0, range -1.3 to +1.3); days 2 to 3, 0.1 versus 1.6 (-1.5, range -3.0 to -0.1); days 4 to 6, 2.2 versus 2.3 (-0.2, range -2.1 to +1.8); days 7 to 10, -0.9 versus 2.6 (-3.5, range -6.4 to -0.7). Holding for two or three times the consolidation length instead of a fixed 40 days (average 11 to 13 days held) gives -2.0 and -2.1 bp a day against the normal path (ranges -3.6 to -0.5 and -3.5 to -0.8). Longer consolidations do worse, not better.
+
 **Costs.** Estimated bid-ask spread (from daily highs and lows): median 0.82%, mean 0.96%. Half the spread plus 5 bp per side is about 1.06% per round trip.
 
 | | Before costs | After costs |
