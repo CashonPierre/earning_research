@@ -268,16 +268,6 @@ In the brief's words: for the timing claim, *the original result was caused by a
 | Corwin-Schultz spread | bid-ask spread estimated from daily highs and lows |
 | Point-in-time | using, for each date, only what was known on that date |
 
-## Questions an interviewer may ask
-
-1. **Why did B lose to A before 2015?** On breakout cases A holds B's position plus a +3.3% run-up; the 40% that never broke out lost only 2.7% under A. B's zeros do not make up the gap.
-2. **Are day-1 breakouts trivial?** Yes, but excluding them changes nothing (-0.37% vs -0.34%), and B loses most where the close was far below the high.
-3. **Is the main test biased by picking breakouts?** No. It starts after the breakout day and compares with all strong-report stocks over the same days in the same quarter. The spike day is excluded on both sides.
-4. **What would have convinced you?** A positive main test with a range above zero in both halves, controls that did not copy it, and a flat placebo. None happened.
-5. **Where was the look-ahead in the proposal?** Ranking within the quarter, and buying at the signal close. Both were replaced before any test.
-6. **Could late dating explain the null?** It adds noise, not bias; 64% of events are dated right and most of the rest are one day late.
-7. **Why SPY as benchmark?** Simplicity. The main test compares stocks with themselves on the same days, so the benchmark cancels; the placebo is a second benchmark-free check.
-8. **Is anything tradable?** No. Costs of about 1% per round trip exceed the +0.55% return; before 2015 the net is +0.43% with a range that includes zero.
 
 ## References
 
