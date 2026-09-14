@@ -29,7 +29,7 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 </tr>
 </tbody>
 </table>
-<p>If drift arrives only after the breakout, B should earn more than A. But look at a made-up stock:</p>
+<p>If drift arrives only after the breakout, B should earn more than A. But look at a made-up stock that faded from its high on the earnings day (about half of real cases close well below their high):</p>
 <table>
 <thead>
 <tr>
@@ -41,13 +41,13 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 <tbody>
 <tr>
 <td>Earnings day</td>
-<td>close 100, high 104</td>
-<td>big jump</td>
+<td>jumps, trades as high as 104 during the day, closes at 100</td>
+<td>the "earnings-day high" is 104</td>
 </tr>
 <tr>
 <td>Day 1 open</td>
 <td>100</td>
-<td><strong>A buys</strong></td>
+<td><strong>A buys</strong> (the stock opens where it closed)</td>
 </tr>
 <tr>
 <td>Day 3 close</td>
@@ -209,9 +209,9 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 <li>Take every 8-K with Item 2.02 (earnings release).</li>
 <li><strong>Day 0</strong> = the first session that could react: filed before 09:30 New York time, same day; filed after 16:00, next trading day; filed during the session, set aside as "unclear" (used only in a check).</li>
 <li>Link the company to its stock through the CIK, including stocks that no longer trade.</li>
-<li>Keep US common stocks on NYSE, Nasdaq or NYSE American, price at least $5, average daily dollar volume at least $1 million, at least 120 days of history. All measured <em>before</em> day 0.</li>
+<li>Keep US common stocks on NYSE, Nasdaq or NYSE American, price at least $5, median daily dollar volume over the previous 60 days at least $1 million, at least 120 days of history. All measured <em>before</em> day 0. Dollar volume is the size and liquidity screen (point-in-time market cap is not in the daily data); the selected events have a median $13 million traded per day and a median price of $26, and results are also split by liquidity third and re-run with a $5 million floor (section 9).</li>
 <li>Measure the day-0 reaction: return from the day before to day 0, minus SPY.</li>
-<li>Keep a "strong report" if the reaction is in the top 10% of the <em>previous four quarters</em>. This threshold was knowable on the day; ranking within the same quarter would use the future.</li>
+<li>Keep a "strong report" if the reaction is in the top 10% of the <em>previous four quarters</em>. This threshold was knowable on the day; ranking within the same quarter would use the future. Four other definitions (a fixed +5%, a reaction of 2 standard deviations, an overnight gap-up of 2 standard deviations, a gap-up of 5%) are run as checks in section 9 and give the same answer.</li>
 </ol>
 <p>Result: 14,770 strong reports, 3,116 stocks, 86 quarters. Median reaction +12.4%. 22% are stocks that later delisted. Check on the dating: for 64% of events the biggest move falls on our day 0, for about 20% one day later (an 8-K filed hours after the press release). This noise hits Rules A and B equally.</p>
 <table>
@@ -476,9 +476,21 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 <td>same picture</td>
 </tr>
 <tr>
-<td>"Strong" = 2 standard deviations (35,515)</td>
+<td>"Strong" = reaction of 2 standard deviations (35,515)</td>
 <td>-0.07%</td>
 <td>-0.5</td>
+<td>same picture</td>
+</tr>
+<tr>
+<td>"Strong" = overnight <strong>gap-up</strong> of 2 standard deviations (25,776)</td>
+<td>-0.03%</td>
+<td>-0.7 (-1.2 to -0.2)</td>
+<td>same picture; Rule A only +0.08%</td>
+</tr>
+<tr>
+<td>"Strong" = overnight gap-up of at least 5% (18,173)</td>
+<td>-0.24%</td>
+<td>-1.1</td>
 <td>same picture</td>
 </tr>
 <tr>
@@ -860,6 +872,26 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 <td style="text-align: right;">-0.000108976</td>
 <td style="text-align: right;">-0.000185794</td>
 <td style="text-align: right;">-3.31379e-05</td>
+</tr>
+<tr>
+<td style="text-align: left;">selection: overnight gap-up &gt;= 2 std</td>
+<td style="text-align: right;">25776</td>
+<td style="text-align: right;">-0.00032901</td>
+<td style="text-align: right;">-0.00497556</td>
+<td style="text-align: right;">0.0047775</td>
+<td style="text-align: right;">-6.91324e-05</td>
+<td style="text-align: right;">-0.00011531</td>
+<td style="text-align: right;">-2.4318e-05</td>
+</tr>
+<tr>
+<td style="text-align: left;">selection: overnight gap-up &gt;= 5%</td>
+<td style="text-align: right;">18173</td>
+<td style="text-align: right;">-0.00242205</td>
+<td style="text-align: right;">-0.00841828</td>
+<td style="text-align: right;">0.00366927</td>
+<td style="text-align: right;">-0.000107038</td>
+<td style="text-align: right;">-0.000175065</td>
+<td style="text-align: right;">-4.12279e-05</td>
 </tr>
 <tr>
 <td style="text-align: left;">selection: trailing 85th percentile</td>

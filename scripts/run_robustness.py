@@ -49,6 +49,9 @@ def select_pct(ev, pct):
         thr[q] = float(np.quantile(arr, pct)) if len(arr) >= 200 else np.nan
     t = ev.quarter.map(thr)
     return ev[ev.passes_filters & (ev.timing != "intraday") & ev.in_sample_period & t.notna() & (ev.ar0 >= t)]
+base_ok = ev.passes_filters & (ev.timing != "intraday") & ev.in_sample_period
+variant("selection: overnight gap-up >= 2 std", ev[base_ok & (ev.gap0 / ev.std60_ab_m1 >= 2)], "R17", "strong = opening gap at least 2 trailing daily std devs (candidate's preferred definition)")
+variant("selection: overnight gap-up >= 5%", ev[base_ok & (ev.gap0 >= 0.05)], "R18", "strong = opening gap of at least 5%")
 variant("selection: trailing 85th percentile", select_pct(ev, 0.85), "R13", "looser cut-off than the 90th percentile")
 variant("selection: trailing 95th percentile", select_pct(ev, 0.95), "R14", "stricter cut-off than the 90th percentile")
 variant("filter: price >= $10 on day -1", sel[sel.close_unadj_m1 >= 10], "R15", "stricter price filter (subset of base)")

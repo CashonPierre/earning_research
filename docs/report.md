@@ -19,12 +19,12 @@ Two rules on the same stock, same earnings day, same 40-day window:
 | **A** | next morning at the open | close of day 40 |
 | **B** | the morning after the first close above the earnings-day high | close of day 40 |
 
-If drift arrives only after the breakout, B should earn more than A. But look at a made-up stock:
+If drift arrives only after the breakout, B should earn more than A. But look at a made-up stock that faded from its high on the earnings day (about half of real cases close well below their high):
 
 | Day | Price | What happens |
 |---|---|---|
-| Earnings day | close 100, high 104 | big jump |
-| Day 1 open | 100 | **A buys** |
+| Earnings day | jumps, trades as high as 104 during the day, closes at 100 | the "earnings-day high" is 104 |
+| Day 1 open | 100 | **A buys** (the stock opens where it closed) |
 | Day 3 close | 105 | first close above 104 |
 | Day 4 open | 105 | **B buys** |
 | Day 40 close | 110 | both sell |
@@ -77,9 +77,9 @@ Prices were downloaded *unadjusted* and split-adjusted by us, so price filters u
 1. Take every 8-K with Item 2.02 (earnings release).
 2. **Day 0** = the first session that could react: filed before 09:30 New York time, same day; filed after 16:00, next trading day; filed during the session, set aside as "unclear" (used only in a check).
 3. Link the company to its stock through the CIK, including stocks that no longer trade.
-4. Keep US common stocks on NYSE, Nasdaq or NYSE American, price at least $5, average daily dollar volume at least $1 million, at least 120 days of history. All measured *before* day 0.
+4. Keep US common stocks on NYSE, Nasdaq or NYSE American, price at least $5, median daily dollar volume over the previous 60 days at least $1 million, at least 120 days of history. All measured *before* day 0. Dollar volume is the size and liquidity screen (point-in-time market cap is not in the daily data); the selected events have a median $13 million traded per day and a median price of $26, and results are also split by liquidity third and re-run with a $5 million floor (section 9).
 5. Measure the day-0 reaction: return from the day before to day 0, minus SPY.
-6. Keep a "strong report" if the reaction is in the top 10% of the *previous four quarters*. This threshold was knowable on the day; ranking within the same quarter would use the future.
+6. Keep a "strong report" if the reaction is in the top 10% of the *previous four quarters*. This threshold was knowable on the day; ranking within the same quarter would use the future. Four other definitions (a fixed +5%, a reaction of 2 standard deviations, an overnight gap-up of 2 standard deviations, a gap-up of 5%) are run as checks in section 9 and give the same answer.
 
 Result: 14,770 strong reports, 3,116 stocks, 86 quarters. Median reaction +12.4%. 22% are stocks that later delisted. Check on the dating: for 64% of events the biggest move falls on our day 0, for about 20% one day later (an 8-K filed hours after the press release). This noise hits Rules A and B equally.
 
@@ -176,7 +176,9 @@ Every check ran through the same code and is logged in `logs/experiment_record.c
 | Ignore day-1 breakouts | -0.37% | -0.9 | not a day-1 artefact |
 | Buy at the signal close, not next open | -0.41% | -1.2 | faster fills do not help |
 | "Strong" = at least +5% (26,610 cases) | -0.18% | -0.7 | same picture |
-| "Strong" = 2 standard deviations (35,515) | -0.07% | -0.5 | same picture |
+| "Strong" = reaction of 2 standard deviations (35,515) | -0.07% | -0.5 | same picture |
+| "Strong" = overnight **gap-up** of 2 standard deviations (25,776) | -0.03% | -0.7 (-1.2 to -0.2) | same picture; Rule A only +0.08% |
+| "Strong" = overnight gap-up of at least 5% (18,173) | -0.24% | -1.1 | same picture |
 | Top 15% / top 5% instead of top 10% | -0.24% / -0.54% | -0.8 / -1.2 | same picture |
 | Price at least $10 / volume at least $5M | -0.22% / -0.21% | -0.7 / -0.8 | same picture |
 | Include "unclear" filing times | -0.38% | -0.8 | same picture |
@@ -296,6 +298,8 @@ Source: `outputs/tables/robustness_W10_H40.csv`
 | intraday filings included                                   |   16025 | -0.00381332  | -0.0087933  | 0.00123643  |      -8.10377e-05 | -0.000141404 | -2.13777e-05 |
 | placebo: pseudo day 0 = 60 sessions before the event        |   14744 | -0.00402525  | -0.00905147 | 0.000984825 |      -4.34127e-05 | -0.000115132 |  3.00655e-05 |
 | short-side mirror (bottom decile, close < day-0 low), gross |   14767 | -0.00500591  | -0.00979412 | 5.96633e-05 |      -0.000108976 | -0.000185794 | -3.31379e-05 |
+| selection: overnight gap-up >= 2 std                        |   25776 | -0.00032901  | -0.00497556 | 0.0047775   |      -6.91324e-05 | -0.00011531  | -2.4318e-05  |
+| selection: overnight gap-up >= 5%                           |   18173 | -0.00242205  | -0.00841828 | 0.00366927  |      -0.000107038 | -0.000175065 | -4.12279e-05 |
 | selection: trailing 85th percentile                         |   21978 | -0.002394    | -0.0072423  | 0.00257764  |      -7.86907e-05 | -0.000130349 | -2.55322e-05 |
 | selection: trailing 95th percentile                         |    7561 | -0.00539022  | -0.0110199  | 0.000391727 |      -0.000121054 | -0.000207049 | -3.86035e-05 |
 | filter: price >= $10 on day -1                              |   12624 | -0.0022306   | -0.00669892 | 0.00245388  |      -7.0377e-05  | -0.000127282 | -1.37012e-05 |
