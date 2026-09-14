@@ -1,0 +1,800 @@
+<html><head><meta charset='utf-8'></head><body><h1>Research proposal (as submitted, 9 September 2026)</h1>
+<p>Title: Does post-earnings drift happen mostly after the stock clears its earnings-day high?</p>
+<h2>Research question</h2>
+<p>After a strong earnings report, does the stock drift upward steadily from the next day, or does most of the move happen only after it first closes above its report-day high? This is a question about timing rather than size.</p>
+<h2>Hypothesis</h2>
+<p>Drift is concentrated after the stock clears its earnings-day high. I compare two rules on the same events over the same window. Rule A buys the day after the report. Rule B waits and buys only once the stock closes above its earnings-day high. If the hypothesis holds, Rule B earns more despite holding for fewer days.</p>
+<h2>Motivation</h2>
+<p>Buying a breakout from post-earnings consolidation is a widely taught setup, rarely tested against a passive benchmark. Ball and Brown (1968) and Bernard and Thomas (1989) documented post-earnings drift, but Martineau (2022) shows it has since disappeared, absent in large stocks since 2006. I therefore expect average drift near zero, which is what makes the timing question worth asking: a zero average can hide continuation offset by reversal.</p>
+<h2>Asset class and universe</h2>
+<p>US common stocks. Filters use only pre-event data: minimum prior close and trailing dollar volume. Delisted stocks are retained, so the sample is not biased toward survivors.</p>
+<h2>Massive datasets and endpoints</h2>
+<p>Daily Market Summary for daily prices, one call per date for the whole market; 8-K Disclosures and Disclosure Categories for Item 2.02 releases and timestamps; All Tickers and Ticker Events for security type and delistings; Splits and Dividends for adjustment; NBBO Quotes for spreads; Income Statements for an alternative surprise measure; SPY as benchmark.</p>
+<h2>External data</h2>
+<p>None expected. If 8-K coverage or timestamps prove insufficient, I will fall back to SEC EDGAR and document the change.</p>
+<h2>Variable studied</h2>
+<p>Cumulative abnormal return: stock return minus SPY return, accumulated over the days after the report.</p>
+<h2>Why the relationship may exist</h2>
+<p>If holders take profits after good news, their selling absorbs buying pressure and holds the price flat until that supply clears; Frazzini (2006) finds drift is largest when the news and holders' unrealised gains share a sign. A close above the earnings-day high also removes a reference level investors were anchored to. Both imply a late move.</p>
+<h2>Methodology and evaluation plan</h2>
+<p>Assign day 0 by comparing each Item 2.02 timestamp to 16:00 ET, separating before-open from after-close reports. Rank events by day-0 abnormal return within each quarter and take the top decile. Run both rules over an identical window, counting days before Rule B enters as zero return, so Rule B is handicapped by construction and must win anyway. Aggregate to a daily cross-sectional mean before testing, since clustered earnings dates would inflate pooled test statistics. Two parameters only, the maximum wait and the holding length, chosen on an early sub-period and reported on a later one, with the full grid disclosed including failures. Costs are applied separately, reported gross and net. Robustness: a mirrored short-side run, a split by day-0 range placement, and a placebo test in a pre-earnings window.</p>
+<h2>Limitations and research risks</h2>
+<p>The 8-K timestamp may lag the press release and some issuers report without an Item 2.02, so measuring coverage is my first task. Breakout status depends on what happened after the report, which is why both rules share a window, and why separating genuine timing from the mechanical exclusion of stocks that fell is the main analytical risk. Earnings cluster into four seasons a year, so my effective sample is far smaller than the event count suggests, and I will report confidence intervals rather than significance alone. Drift is reported to have weakened and to concentrate in illiquid names, so the effect may be absent, or present before costs and untradable after. Any of these would be reported as the conclusion.</p><hr><h1>Final report (14 September 2026)</h1>
+<h1>After good earnings, does the extra return wait for a breakout?</h1>
+<p><em>Lei Kam Fai (Woody). Quant Team Recruitment, Round 1. 14 September 2026. Data: Massive API and SEC EDGAR.</em></p>
+<h2>The answer in one paragraph</h2>
+<p>A popular trading rule says: after a great earnings report, wait until the stock closes above its earnings-day high, then buy. I tested whether the extra return really arrives after that "breakout". I used 14,770 US earnings days from 2005 to 2026 where the stock jumped into the top 10% of reactions. <strong>It does not.</strong> After a breakout, the stock earns 0.9 basis points a day above the market; the same stocks earn 1.8 a day over the same days whether or not they broke out. Waiting for the breakout earned <em>less</em> than buying the next morning (about 0.9% less per trade before 2015, about the same after). Buying the next morning earned about 1.4% over 40 days before 2015 and nothing since, and trading costs of about 1% per round trip wipe that out. <strong>The idea is rejected.</strong></p>
+<h2>1. The question</h2>
+<p>Some stocks keep rising for weeks after a strong earnings report. Traders call this drift. The question is not <em>how much</em> drift there is, but <em>when</em> it arrives: steadily from the next day, or mostly after the stock first closes above the high of the earnings day?</p>
+<h2>2. The idea, and the trap in it</h2>
+<p>Two rules on the same stock, same earnings day, same 40-day window:</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Buys</th>
+<th>Sells</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>next morning at the open</td>
+<td>close of day 40</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>the morning after the first close above the earnings-day high</td>
+<td>close of day 40</td>
+</tr>
+</tbody>
+</table>
+<p>If drift arrives only after the breakout, B should earn more than A. But look at a made-up stock that faded from its high on the earnings day (about half of real cases close well below their high):</p>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Price</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Day -1 close</td>
+<td>90</td>
+<td>the day before the report</td>
+</tr>
+<tr>
+<td>Day 0 (earnings day)</td>
+<td>opens up, trades as high as 104, closes at 100</td>
+<td>reaction +11%; the "earnings-day high" is 104</td>
+</tr>
+<tr>
+<td>Day 1 open</td>
+<td>100</td>
+<td><strong>A buys</strong> (the stock opens where it closed)</td>
+</tr>
+<tr>
+<td>Day 2 close</td>
+<td>102</td>
+<td>still below 104, B waits</td>
+</tr>
+<tr>
+<td>Day 3 close</td>
+<td>105</td>
+<td>first close above 104: B's signal</td>
+</tr>
+<tr>
+<td>Day 4 open</td>
+<td>105</td>
+<td><strong>B buys</strong></td>
+</tr>
+<tr>
+<td>Day 40 close</td>
+<td>110</td>
+<td>both sell</td>
+</tr>
+</tbody>
+</table>
+<p>A makes +10% (100 to 110). B makes +4.8% (105 to 110). The figure shows the same path.</p>
+<h3>Why Rule A must beat Rule B on breakout cases</h3>
+<p>On any case where the stock breaks out, both rules hold the same position from B's entry to the end. The only difference is that A also held the stock from day 1 until B's entry. So:</p>
+<blockquote>
+<p><strong>A's return = (1 + run-up) x (1 + B's return) - 1</strong>, where the run-up is the price move from A's buy price to B's buy price.</p>
+</blockquote>
+<p>B buys only after a close <em>above the day-0 high</em>, and A bought at the day-1 open, which is almost always <em>below</em> that high. So the run-up is positive in 88% of breakout cases (average +3.8%), and A's return is larger than B's on almost every one of them. In the example: (1 + 5%) x (1 + 4.8%) - 1 = 10%.</p>
+<p>B can therefore only win <em>on average</em> if the stocks that <em>never</em> break out fall a lot, because on those B earns 0 while A takes the loss. In our data, 61% of cases break out (A +4.2%, B +0.3%) and 39% do not (A -5.1%, B 0). "B beats A" is a statement about the losers, not about <em>when</em> drift arrives. This trap shaped the whole design: the main test in section 6 compares only the part of the return that a breakout trader actually receives.</p>
+<p><img src="https://raw.githubusercontent.com/CashonPierre/earning_research/main/outputs/figures/fig0_toy_example.png" alt="Figure 0. The toy example: where Rule A and Rule B buy, and the run-up only A holds." width="640"><br><i>Figure 0. The toy example: where Rule A and Rule B buy, and the run-up only A holds.</i></p>
+
+<h2>3. Data</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>What</th>
+<th>Size</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Massive: Daily Market Summary</td>
+<td>open, high, low, close, volume for every US stock, each weekday 2004 to Sep 2026</td>
+<td>5,988 calls, 23 files</td>
+<td>prices, returns, SPY benchmark</td>
+</tr>
+<tr>
+<td>Massive: All Tickers</td>
+<td>every ticker, live and dead, with company ID (CIK)</td>
+<td>36,588 rows</td>
+<td>link filings to prices; keep delisted stocks</td>
+</tr>
+<tr>
+<td>Massive: Splits</td>
+<td>every split and stock dividend</td>
+<td>27,541 rows</td>
+<td>adjust prices ourselves</td>
+</tr>
+<tr>
+<td>SEC EDGAR submissions (free, public)</td>
+<td>every 8-K filing with the exact time the SEC accepted it</td>
+<td>321,077 earnings 8-Ks, 9,679 companies</td>
+<td>date each earnings event</td>
+</tr>
+</tbody>
+</table>
+<p>Prices were downloaded <em>unadjusted</em> and split-adjusted by us, so price filters use the real price of the day. Our adjustment matches the vendor's own adjusted prices (tested). Raw data is not in the repository (licence); all summary tables are.</p>
+<p><strong>Why EDGAR.</strong> Massive's 8-K endpoints give a filing <em>date</em> but no time, and their earnings tags start in 2020 and miss most releases. EDGAR gives the acceptance time to the second. It is public and free, and the time it shows is the time the news became public.</p>
+<h3>Cleaning and checks</h3>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Problem</th>
+<th>What we did</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prices</td>
+<td>vendor's adjusted prices rescale history to today's share count, so a $5 filter would look at the wrong price</td>
+<td>downloaded unadjusted prices; applied split factors ourselves; checked against the vendor's factors (all tickers) and adjusted prices (split tickers)</td>
+<td><code>prices.py</code>, <code>test_prices.py</code>, <code>test_api_crosscheck.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>duplicate rows across pages</td>
+<td>dropped duplicate (ticker, date) rows</td>
+<td><code>panel.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>holidays and missing days</td>
+<td>trading calendar = days SPY traded; a return is missing if the previous day's bar is missing</td>
+<td><code>panel.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>ETFs, warrants, preferreds, OTC names mixed in</td>
+<td>kept common stocks (type CS) on NYSE, Nasdaq, NYSE American, plus SPY</td>
+<td><code>panel.py</code>, <code>events.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>bad bars</td>
+<td>tested: high &gt;= open and close, low &lt;= open and close in 99.8% of bars; closes positive; about 252 days per year</td>
+<td><code>test_prices.py</code></td>
+</tr>
+<tr>
+<td>Tickers</td>
+<td>one symbol reused by two companies over time</td>
+<td>each ticker record is valid only between the previous namesake's delisting and its own</td>
+<td><code>panel.py</code></td>
+</tr>
+<tr>
+<td>Tickers</td>
+<td>companies with several share classes</td>
+<td>kept the most liquid class per event</td>
+<td><code>events.py</code></td>
+</tr>
+<tr>
+<td>Filings</td>
+<td>amendments and repeat filings</td>
+<td>dropped 8-K/A; one event per company per day 0; dropped follow-ups within 20 sessions</td>
+<td><code>events.py</code></td>
+</tr>
+<tr>
+<td>Filings</td>
+<td>times are in UTC; SEC dates shift after 17:30 New York time</td>
+<td>used the acceptance time converted to New York time, not the filing date</td>
+<td><code>edgar.py</code>, <code>test_edgar.py</code></td>
+</tr>
+<tr>
+<td>Filings</td>
+<td>8-K can lag the press release</td>
+<td>measured: biggest move on day 0 for 64% of events, day +1 for 20%; reported as a limit</td>
+<td><code>timing_validation.csv</code></td>
+</tr>
+<tr>
+<td>Events</td>
+<td>reaction needs two consecutive bars</td>
+<td>required a bar on day -1 and day 0; 1 event had no day-1 open and was dropped from return tables</td>
+<td><code>events.py</code>, <code>test_events.py</code></td>
+</tr>
+<tr>
+<td>Events</td>
+<td>nothing from the future</td>
+<td>tested: threshold built only from earlier quarters; filters use day -1 data; every buy is after its signal</td>
+<td><code>test_events.py</code></td>
+</tr>
+<tr>
+<td>Vendor</td>
+<td>two Massive endpoints disagree on about 1% of days by more than 1%</td>
+<td>used one endpoint (Daily Market Summary) throughout; noted</td>
+<td>decision log 01:10</td>
+</tr>
+</tbody>
+</table>
+<h2>4. How each event was built</h2>
+<ol>
+<li>Take every 8-K with Item 2.02 (earnings release).</li>
+<li><strong>Day 0</strong> = the first session that could react: filed before 09:30 New York time, same day; filed after 16:00, next trading day; filed during the session, set aside as "unclear" (used only in a check).</li>
+<li>Link the company to its stock through the CIK, including stocks that no longer trade.</li>
+<li>Keep US common stocks on NYSE, Nasdaq or NYSE American, price at least $5, median daily dollar volume over the previous 60 days at least $1 million, at least 120 days of history. All measured <em>before</em> day 0. Dollar volume is the size and liquidity screen (point-in-time market cap is not in the daily data); the selected events have a median $13 million traded per day and a median price of $26, and results are also split by liquidity third and re-run with a $5 million floor (section 9).</li>
+<li>Measure the day-0 reaction: return from the day before to day 0, minus SPY.</li>
+<li>Keep a "strong report" if the reaction is in the top 10% of the <em>previous four quarters</em>. This threshold was knowable on the day; ranking within the same quarter would use the future. Four other definitions (a fixed +5%, a reaction of 2 standard deviations, an overnight gap-up of 2 standard deviations, a gap-up of 5%) are run as checks in section 9 and give the same answer.</li>
+</ol>
+<p>Result: 14,770 strong reports, 3,116 stocks, 86 quarters. Median reaction +12.4%. 22% are stocks that later delisted. Check on the dating: for 64% of events the biggest move falls on our day 0, for about 20% one day later (an 8-K filed hours after the press release). This noise hits Rules A and B equally.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">step</th>
+<th style="text-align: right;">events left</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">edgar_item202_rows</td>
+<td style="text-align: right;">321077</td>
+</tr>
+<tr>
+<td style="text-align: left;">8k_not_amended</td>
+<td style="text-align: right;">318081</td>
+</tr>
+<tr>
+<td style="text-align: left;">unique_cik_day0</td>
+<td style="text-align: right;">316021</td>
+</tr>
+<tr>
+<td style="text-align: left;">with_candidate_ticker</td>
+<td style="text-align: right;">311923</td>
+</tr>
+<tr>
+<td style="text-align: left;">matched_to_prices</td>
+<td style="text-align: right;">288469</td>
+</tr>
+<tr>
+<td style="text-align: left;">after_dedupe_20d</td>
+<td style="text-align: right;">271534</td>
+</tr>
+<tr>
+<td style="text-align: left;">exchange_filter</td>
+<td style="text-align: right;">271460</td>
+</tr>
+<tr>
+<td style="text-align: left;">plus_price_filter</td>
+<td style="text-align: right;">226721</td>
+</tr>
+<tr>
+<td style="text-align: left;">plus_liquidity_filter</td>
+<td style="text-align: right;">184493</td>
+</tr>
+<tr>
+<td style="text-align: left;">plus_history_filter</td>
+<td style="text-align: right;">181927</td>
+</tr>
+<tr>
+<td style="text-align: left;">plus_not_intraday</td>
+<td style="text-align: right;">145809</td>
+</tr>
+<tr>
+<td style="text-align: left;">in_sample_period_filtered</td>
+<td style="text-align: right;">142358</td>
+</tr>
+<tr>
+<td style="text-align: left;">selected_top_decile_trailing</td>
+<td style="text-align: right;">14770</td>
+</tr>
+<tr>
+<td style="text-align: left;">selected_fixed_5pct</td>
+<td style="text-align: right;">26611</td>
+</tr>
+<tr>
+<td style="text-align: left;">selected_z0_ge_2</td>
+<td style="text-align: right;">35517</td>
+</tr>
+<tr>
+<td style="text-align: left;">selected_bottom_decile</td>
+<td style="text-align: right;">14771</td>
+</tr>
+</tbody>
+</table>
+<h2>5. The rules and the controls</h2>
+<p>Days are trading days after day 0. H = holding length (40). W = longest wait for a breakout (10).</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Buys at the open of</th>
+<th>Condition</th>
+<th>What it tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>day 1</td>
+<td>none</td>
+<td>plain drift</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>day k+1</td>
+<td>first close above the <strong>day-0 high</strong> on day k (k up to W); else no trade</td>
+<td>the breakout idea</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>day 3</td>
+<td>none (day 2 is B's typical signal day)</td>
+<td>is it just the waiting?</td>
+</tr>
+<tr>
+<td><strong>D1 / D2 / D3</strong></td>
+<td>day k+1</td>
+<td>first close above the day-0 <em>close</em> / 3% above the high / the day-1 high</td>
+<td>is the earnings-day high special?</td>
+</tr>
+</tbody>
+</table>
+<p>All sell at the close of day H. Returns are "abnormal": the stock's return minus SPY's over the same span. If a stock stops trading inside the window, it is sold at its last price (17 cases).</p>
+<h2>6. What we measure</h2>
+<ul>
+<li><strong>Main test.</strong> For each breakout case, the abnormal return <em>per day</em> from its entry to day H, compared with what <em>all</em> strong-report stocks in the same quarter earned per day over those <em>same</em> days. This compares like with like and avoids the trap in section 2.</li>
+<li><strong>Second test.</strong> Rule B's 40-day return minus Rule A's.</li>
+<li><strong>Uncertainty.</strong> Earnings come in four seasons a year, so events are not independent. Every number carries a 95% range from resampling whole quarters (86 of them, 5,000 times). If the range includes zero, the effect is not distinguishable from zero.</li>
+<li><strong>Two settings only.</strong> W (5, 10, 15, 20) and H (20, 40, 60). The default (10, 40) was fixed before any result. 2005 to 2014 picks the best cell; 2015 to 2026 reports it. All other choices (the $5, the $1 million, the top 10%) were fixed once and later checked, not tuned.</li>
+</ul>
+<h2>7. Results (W = 10, H = 40)</h2>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>2005 to 2026</th>
+<th>2005 to 2014</th>
+<th>2015 to 2026</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rule A, 40-day return</td>
+<td><strong>+0.55%</strong> (-0.50 to +1.59)</td>
+<td>+1.43% (+0.57 to +2.35)</td>
+<td>+0.12% (-1.29 to +1.55)</td>
+</tr>
+<tr>
+<td>Rule B, 40-day return</td>
+<td>+0.21%</td>
+<td>+0.51%</td>
+<td>+0.06%</td>
+</tr>
+<tr>
+<td>B minus A</td>
+<td><strong>-0.34%</strong> (-0.87 to +0.20)</td>
+<td><strong>-0.92%</strong> (-1.41 to -0.46)</td>
+<td>-0.06% (-0.77 to +0.67)</td>
+</tr>
+<tr>
+<td>After breakout, per day</td>
+<td>0.9 bp</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Same days, all cases, per day</td>
+<td>1.8 bp</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Main test: difference per day</strong></td>
+<td><strong>-0.9 bp</strong> (-1.5 to -0.2)</td>
+<td>-1.5 bp (-2.4 to -0.6)</td>
+<td>-0.6 bp (-1.4 to +0.3)</td>
+</tr>
+</tbody>
+</table>
+<p><em>bp = basis point = 0.01%. Ranges are 95% confidence intervals.</em></p>
+<p><strong>Three things to see.</strong></p>
+<ol>
+<li><strong>Drift is small and old.</strong> Buying the next morning earned +1.4% before 2015 and nothing after (Figure 1). This matches published work saying the drift has faded.</li>
+<li><strong>Nothing extra after the breakout.</strong> 61% of cases broke out within 10 days, 45% of them on day 1. After the entry they earned 0.9 bp a day; the normal path was 1.8 bp a day. If anything, slightly less (Figure 2). A gap of 1 bp a day is about 0.4% over the window.</li>
+<li><strong>Waiting lost money.</strong> B trailed A in every period, clearly before 2015. Why: breakout cases earned +4.2% under A but only +0.3% under B (the run-up was +3.8%); the 39% that never broke out lost 5.1% under A while B sat out.</li>
+</ol>
+<p><strong>Controls.</strong> C (buy on day 3, no signal) earned +0.45%. D1, D2, D3 earned +0.40%, +0.08%, +0.12%. Every "wait for a higher close" rule behaves like B. The earnings-day high is not a special level.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">cases</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">share of cases</th>
+<th style="text-align: right;">Rule A</th>
+<th style="text-align: right;">Rule B</th>
+<th style="text-align: right;">run-up B skipped</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">all events</td>
+<td style="text-align: right;">14769</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.00546673</td>
+<td style="text-align: right;">0.00207921</td>
+<td style="text-align: right;">0.037913</td>
+</tr>
+<tr>
+<td style="text-align: left;">breakout within W</td>
+<td style="text-align: right;">8974</td>
+<td style="text-align: right;">0.607624</td>
+<td style="text-align: right;">0.041938</td>
+<td style="text-align: right;">0.00342187</td>
+<td style="text-align: right;">0.037913</td>
+</tr>
+<tr>
+<td style="text-align: left;">no breakout within W</td>
+<td style="text-align: right;">5795</td>
+<td style="text-align: right;">0.392376</td>
+<td style="text-align: right;">-0.0510118</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">nan</td>
+</tr>
+</tbody>
+</table>
+<p><img src="https://raw.githubusercontent.com/CashonPierre/earning_research/main/outputs/figures/fig1_car_paths.png" alt="Figure 1. Return above the market after a strong report (Rule A), with 95% ranges." width="640"><br><i>Figure 1. Return above the market after a strong report (Rule A), with 95% ranges.</i></p>
+
+<p><img src="https://raw.githubusercontent.com/CashonPierre/earning_research/main/outputs/figures/fig2_breakout_aligned.png" alt="Figure 2. Daily return above the market around the breakout day. Red: breakout cases. Grey: all cases on the same days." width="640"><br><i>Figure 2. Daily return above the market around the breakout day. Red: breakout cases. Grey: all cases on the same days.</i></p>
+
+<p><strong>How to read Figure 2.</strong> Day 0 here is the <em>breakout</em> day, not the earnings day. The red spike at 0 is large by definition: a breakout is a day the stock rose. Everything right of the green line is what a Rule B trader actually gets. It sits on or just under the grey line.</p>
+<p><strong>Same result in calendar time.</strong> Averaging all open positions each day, the A book earned 2.9 bp a day (t = 2.5), the B book 1.1 bp, and B minus A was -1.8 bp a day (t = -2.9). Before 2015: A 5.2 bp (t = 3.8); after: 0.8 bp (t = 0.5).</p>
+<h2>8. Does the choice of W and H matter? No.</h2>
+<p>B minus A is negative in all 12 cells for 2005 to 2014 (the range is below zero in 11) and not distinguishable from zero in all 12 cells for 2015 to 2026. The main test stays between -1.8 and +0.3 bp a day everywhere. The cell picked on 2005 to 2014 was W = 20, H = 60; on 2015 to 2026 it gives -0.1 bp a day (-0.7 to +0.5) and B minus A of +0.17% (-0.58 to +0.91).</p>
+<p><img src="https://raw.githubusercontent.com/CashonPierre/earning_research/main/outputs/figures/fig5_grid_B_minus_A.png" alt="Figure 3. B minus A for every W and H. Left: 2005 to 2014. Right: 2015 to 2026." width="640"><br><i>Figure 3. B minus A for every W and H. Left: 2005 to 2014. Right: 2015 to 2026.</i></p>
+
+<h2>9. Checks</h2>
+<p>Every check ran through the same code and is logged in <code>logs/experiment_record.csv</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>B minus A</th>
+<th>Extra drift after breakout (bp/day)</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base</td>
+<td>-0.34%</td>
+<td>-0.9 (-1.5 to -0.2)</td>
+<td></td>
+</tr>
+<tr>
+<td>Ignore day-1 breakouts</td>
+<td>-0.37%</td>
+<td>-0.9</td>
+<td>not a day-1 artefact</td>
+</tr>
+<tr>
+<td>Buy at the signal close, not next open</td>
+<td>-0.41%</td>
+<td>-1.2</td>
+<td>faster fills do not help</td>
+</tr>
+<tr>
+<td>"Strong" = at least +5% (26,610 cases)</td>
+<td>-0.18%</td>
+<td>-0.7</td>
+<td>same picture</td>
+</tr>
+<tr>
+<td>"Strong" = reaction of 2 standard deviations (35,515)</td>
+<td>-0.07%</td>
+<td>-0.5</td>
+<td>same picture</td>
+</tr>
+<tr>
+<td>"Strong" = overnight <strong>gap-up</strong> of 2 standard deviations (25,776)</td>
+<td>-0.03%</td>
+<td>-0.7 (-1.2 to -0.2)</td>
+<td>same picture; Rule A only +0.08%</td>
+</tr>
+<tr>
+<td>"Strong" = overnight gap-up of at least 5% (18,173)</td>
+<td>-0.24%</td>
+<td>-1.1</td>
+<td>same picture</td>
+</tr>
+<tr>
+<td>Top 15% / top 5% instead of top 10%</td>
+<td>-0.24% / -0.54%</td>
+<td>-0.8 / -1.2</td>
+<td>same picture</td>
+</tr>
+<tr>
+<td>Price at least $10 / volume at least $5M</td>
+<td>-0.22% / -0.21%</td>
+<td>-0.7 / -0.8</td>
+<td>same picture</td>
+</tr>
+<tr>
+<td>Include "unclear" filing times</td>
+<td>-0.38%</td>
+<td>-0.8</td>
+<td>same picture</td>
+</tr>
+<tr>
+<td><strong>Placebo: same stocks, 60 days earlier, no news</strong></td>
+<td>-0.40%</td>
+<td>-0.4 (-1.2 to +0.3)</td>
+<td>B trails A even without news: the gap is mechanical</td>
+</tr>
+<tr>
+<td>Mirror on the short side (worst 10%, break below the low)</td>
+<td>-0.50%</td>
+<td>-1.1</td>
+<td>symmetric; borrowing costs ignored</td>
+</tr>
+<tr>
+<td>Friday announcements (22% of cases)</td>
+<td>-0.16%</td>
+<td>-2.8 (-4.7 to -0.8)</td>
+<td>wrong sign for an "inattention" story; one split of many</td>
+</tr>
+<tr>
+<td>Least / middle / most liquid third</td>
+<td>-0.48% / -0.05% / -0.49%</td>
+<td></td>
+<td>not an illiquid-stock effect</td>
+</tr>
+<tr>
+<td>Close near day-0 low / middle / high</td>
+<td>-0.70% / -0.31% / -0.01%</td>
+<td></td>
+<td>B loses most where the high really binds</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Does a longer consolidation mean more drift after the breakout?</strong> No. Splitting breakout cases by how many days they took to break out: after a day-1 breakout, 1.4 bp a day versus 1.4 for the normal path (difference -0.0, range -1.3 to +1.3); days 2 to 3, 0.1 versus 1.6 (-1.5, range -3.0 to -0.1); days 4 to 6, 2.2 versus 2.3 (-0.2, range -2.1 to +1.8); days 7 to 10, -0.9 versus 2.6 (-3.5, range -6.4 to -0.7). Holding for two or three times the consolidation length instead of a fixed 40 days (average 11 to 13 days held) gives -2.0 and -2.1 bp a day against the normal path (ranges -3.6 to -0.5 and -3.5 to -0.8). Longer consolidations do worse, not better.</p>
+<p><strong>Costs.</strong> Estimated bid-ask spread (from daily highs and lows): median 0.82%, mean 0.96%. Half the spread plus 5 bp per side is about 1.06% per round trip.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Before costs</th>
+<th>After costs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rule A, 2005 to 2026</td>
+<td>+0.55%</td>
+<td>-0.52% (-1.55 to +0.52)</td>
+</tr>
+<tr>
+<td>Rule A, 2005 to 2014</td>
+<td>+1.43%</td>
+<td>+0.43% (-0.43 to +1.35)</td>
+</tr>
+<tr>
+<td>Rule A, 2015 to 2026</td>
+<td>+0.12%</td>
+<td>-0.97% (-2.37 to +0.45)</td>
+</tr>
+<tr>
+<td>Rule B, 2005 to 2026</td>
+<td>+0.21%</td>
+<td>-0.45% (-1.01 to +0.14)</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing here is tradable.</p>
+<p><em>(Full table: Appendix Table A1, <code>outputs/tables/robustness_W10_H40.csv</code>.)</em></p>
+<p><em>(Full table: Appendix Table A2, <code>outputs/tables/costs_W10_H40.csv</code>.)</em></p>
+<h2>10. What changed from the proposal, and why</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Proposal said</th>
+<th>Found</th>
+<th>Tested by then</th>
+<th>Did instead</th>
+<th>Why better</th>
+<th>Lesson</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>time each report with Massive 8-K timestamps</td>
+<td>no time field; tags start 2020 and miss most releases</td>
+<td>nothing</td>
+<td>SEC EDGAR acceptance times</td>
+<td>exact, public, point-in-time</td>
+<td>read the field list, not the endpoint name</td>
+</tr>
+<tr>
+<td>2</td>
+<td>top 10% within each quarter</td>
+<td>uses the future</td>
+<td>nothing</td>
+<td>top 10% of the previous 4 quarters</td>
+<td>knowable on the day</td>
+<td>selection must be computable at trade time</td>
+</tr>
+<tr>
+<td>3</td>
+<td>B buys "once it closes above the high"</td>
+<td>cannot buy at a close you have not seen</td>
+<td>nothing</td>
+<td>buy next open; signal-close version as a check</td>
+<td>every fill uses a real later price</td>
+<td>fix fills before hypotheses</td>
+</tr>
+<tr>
+<td>4</td>
+<td>B beats A shows late drift</td>
+<td>A contains B plus the run-up (section 2)</td>
+<td>nothing at design; one run of the first replacement</td>
+<td>per-day drift after breakout vs same days, all cases</td>
+<td>compares like with like</td>
+<td>write the algebra before the code</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Ticker Events for delistings</td>
+<td>only symbol changes</td>
+<td>probe</td>
+<td>dead tickers from All Tickers, matched by CIK</td>
+<td>keeps 22% of the sample</td>
+<td>survivorship protection must be built</td>
+</tr>
+<tr>
+<td>6</td>
+<td>tick-level quotes for spreads</td>
+<td>too much data, not needed</td>
+<td>probe</td>
+<td>Corwin-Schultz spread from daily high/low</td>
+<td>computable for every event</td>
+<td>use what is downloaded</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Benzinga / income statements as second surprise</td>
+<td>Benzinga not entitled (403)</td>
+<td>probe</td>
+<td>price reaction only, two alternative cut-offs</td>
+<td>it is the variable the rule is about</td>
+<td>probe entitlements first</td>
+</tr>
+<tr>
+<td>8</td>
+<td>adjust for dividends too</td>
+<td>a few bp over 40 days; cancels in same-day comparison</td>
+<td>nothing</td>
+<td>splits only; noted as a limit</td>
+<td>adjusts for what matters</td>
+<td>match adjustment to horizon</td>
+</tr>
+</tbody>
+</table>
+<p>Change 4 has one more step. The plan first replaced "B beats A" with "per-day return after the breakout vs before it". One run (02:13, experiment E00) showed the "before" part is meaningless: before a breakout the stock is, by definition, going up (+2.28% a day). So, before running the grid or any check, I switched to the same-days comparison above. Both versions are in the logs and tables; nothing is hidden.</p>
+<h2>11. Limits</h2>
+<ul>
+<li>About one event in five is dated a day late because the 8-K lags the press release. This adds noise to A and B alike.</li>
+<li>Exchange membership is today's, not as of the event date.</li>
+<li>Returns are price returns above SPY; no dividends, no beta adjustment. The main test compares stocks with themselves on the same days, so this matters little.</li>
+<li>Costs are estimates, not fills.</li>
+<li>Confidence ranges rest on 86 quarters, not 14,770 events, so they are wide. The main test could detect an extra drift of about 0.7 bp a day (about 0.25% over the window); smaller effects cannot be ruled out.</li>
+<li>Ten design choices were made; only W and H were tuned, on 2005 to 2014, and reported on 2015 to 2026.</li>
+</ul>
+<h2>12. Conclusion</h2>
+<ol>
+<li><strong>No extra drift after a breakout:</strong> 0.9 bp a day versus 1.8 for the same stocks on the same days; difference -0.9 bp (-1.5 to -0.2).</li>
+<li><strong>Waiting costs money:</strong> B trailed A by 0.34% overall and 0.92% before 2015.</li>
+<li><strong>The earnings-day high is not special:</strong> other price levels, a fixed delay and a no-news placebo all behave like B.</li>
+<li><strong>The drift itself is small, old and untradable:</strong> +1.4% before 2015, nothing since, and about 1% per round trip in costs.</li>
+</ol>
+<p>In the brief's words: for the timing claim, <em>the original result was caused by a methodological issue</em>; for the drift, <em>it exists before costs but is not practically tradable</em>, and only before 2015.</p>
+<h2>13. What I would do next</h2>
+<ul>
+<li>Date events by press-release time and measure how much the 8-K lag matters.</li>
+<li>Add a fundamental surprise (reported vs expected earnings) next to the price reaction.</li>
+<li>Test anchoring where the literature puts it: nearness to the 52-week high before the report.</li>
+<li>Compare with non-earnings days that had equally big moves, to separate earnings drift from ordinary momentum.</li>
+</ul>
+<h2>Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Abnormal return</td>
+<td>the stock's return minus SPY's return over the same days</td>
+</tr>
+<tr>
+<td>Day 0</td>
+<td>first trading session that could react to the report</td>
+</tr>
+<tr>
+<td>Breakout</td>
+<td>first close above the day-0 high, within W days</td>
+</tr>
+<tr>
+<td>bp (basis point)</td>
+<td>0.01%. 100 bp = 1%</td>
+</tr>
+<tr>
+<td>Look-ahead</td>
+<td>using information that was not available on the day</td>
+</tr>
+<tr>
+<td>Survivorship bias</td>
+<td>studying only companies that still exist</td>
+</tr>
+<tr>
+<td>95% range (confidence interval)</td>
+<td>values consistent with the data; includes zero = no clear effect</td>
+</tr>
+<tr>
+<td>Season resampling</td>
+<td>rebuilding the sample by drawing whole quarters at random, many times, to get the range</td>
+</tr>
+<tr>
+<td>Calendar-time book</td>
+<td>each day, the average return of all positions open that day</td>
+</tr>
+<tr>
+<td>Newey-West t</td>
+<td>a t-statistic corrected for day-to-day correlation</td>
+</tr>
+<tr>
+<td>Corwin-Schultz spread</td>
+<td>bid-ask spread estimated from daily highs and lows</td>
+</tr>
+<tr>
+<td>Point-in-time</td>
+<td>using, for each date, only what was known on that date</td>
+</tr>
+</tbody>
+</table>
+<h2>Questions an interviewer may ask</h2>
+<ol>
+<li><strong>Why did B lose to A before 2015?</strong> On breakout cases A holds B's position plus a +3.3% run-up; the 40% that never broke out lost only 2.7% under A. B's zeros do not make up the gap.</li>
+<li><strong>Are day-1 breakouts trivial?</strong> Yes, but excluding them changes nothing (-0.37% vs -0.34%), and B loses most where the close was far below the high.</li>
+<li><strong>Is the main test biased by picking breakouts?</strong> No. It starts after the breakout day and compares with all strong-report stocks over the same days in the same quarter. The spike day is excluded on both sides.</li>
+<li><strong>What would have convinced you?</strong> A positive main test with a range above zero in both halves, controls that did not copy it, and a flat placebo. None happened.</li>
+<li><strong>Where was the look-ahead in the proposal?</strong> Ranking within the quarter, and buying at the signal close. Both were replaced before any test.</li>
+<li><strong>Could late dating explain the null?</strong> It adds noise, not bias; 64% of events are dated right and most of the rest are one day late.</li>
+<li><strong>Why SPY as benchmark?</strong> Simplicity. The main test compares stocks with themselves on the same days, so the benchmark cancels; the placebo is a second benchmark-free check.</li>
+<li><strong>Is anything tradable?</strong> No. Costs of about 1% per round trip exceed the +0.55% return; before 2015 the net is +0.43% with a range that includes zero.</li>
+</ol>
+<h2>References</h2>
+<p>Ball &amp; Brown (1968) <em>JAR</em> 6, 159-178. Bernard &amp; Thomas (1989) <em>JAR</em> 27 Suppl., 1-36; (1990) <em>JAE</em> 13, 305-340. Chan, Jegadeesh &amp; Lakonishok (1996) <em>JF</em> 51, 1681-1713. Corwin &amp; Schultz (2012) <em>JF</em> 67, 719-760. DellaVigna &amp; Pollet (2009) <em>JF</em> 64, 709-749. Foster, Olsen &amp; Shevlin (1984) <em>Accounting Review</em> 59, 574-603. Frazzini (2006) <em>JF</em> 61, 2017-2046. George &amp; Hwang (2004) <em>JF</em> 59, 2145-2176. Grinblatt &amp; Han (2005) <em>JFE</em> 78, 311-339. Hirshleifer, Lim &amp; Teoh (2009) <em>JF</em> 64, 2289-2325. Huddart, Lang &amp; Yetman (2009) <em>Management Science</em> 55, 16-31. Jegadeesh (1990) <em>JF</em> 45, 881-898. Lehmann (1990) <em>QJE</em> 105, 1-28. Martineau (2022) <em>Critical Finance Review</em> 11, 613-646.</p>
+<h2>Reproducing</h2>
+<p><code>scripts/run_all.py</code> runs every stage. <code>scripts/build_notebook.py</code> rebuilds this document (notebook and markdown) from the committed tables alone. <code>python -m pytest -q</code> runs the checks.</p></body></html>
