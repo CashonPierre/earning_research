@@ -113,6 +113,97 @@ th,td{border:1px solid #bbb;padding:3px 6px;vertical-align:top} th{background:#f
 </table>
 <p>Prices were downloaded <em>unadjusted</em> and split-adjusted by us, so price filters use the real price of the day. Our adjustment matches the vendor's own adjusted prices (tested). Raw data is not in the repository (licence); all summary tables are.</p>
 <p><strong>Why EDGAR.</strong> Massive's 8-K endpoints give a filing <em>date</em> but no time, and their earnings tags start in 2020 and miss most releases. EDGAR gives the acceptance time to the second. It is public and free, and the time it shows is the time the news became public.</p>
+<h3>Cleaning and checks</h3>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Problem</th>
+<th>What we did</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prices</td>
+<td>vendor's adjusted prices rescale history to today's share count, so a $5 filter would look at the wrong price</td>
+<td>downloaded unadjusted prices; applied split factors ourselves; checked against the vendor's factors (all tickers) and adjusted prices (split tickers)</td>
+<td><code>prices.py</code>, <code>test_prices.py</code>, <code>test_api_crosscheck.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>duplicate rows across pages</td>
+<td>dropped duplicate (ticker, date) rows</td>
+<td><code>panel.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>holidays and missing days</td>
+<td>trading calendar = days SPY traded; a return is missing if the previous day's bar is missing</td>
+<td><code>panel.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>ETFs, warrants, preferreds, OTC names mixed in</td>
+<td>kept common stocks (type CS) on NYSE, Nasdaq, NYSE American, plus SPY</td>
+<td><code>panel.py</code>, <code>events.py</code></td>
+</tr>
+<tr>
+<td>Prices</td>
+<td>bad bars</td>
+<td>tested: high &gt;= open and close, low &lt;= open and close in 99.8% of bars; closes positive; about 252 days per year</td>
+<td><code>test_prices.py</code></td>
+</tr>
+<tr>
+<td>Tickers</td>
+<td>one symbol reused by two companies over time</td>
+<td>each ticker record is valid only between the previous namesake's delisting and its own</td>
+<td><code>panel.py</code></td>
+</tr>
+<tr>
+<td>Tickers</td>
+<td>companies with several share classes</td>
+<td>kept the most liquid class per event</td>
+<td><code>events.py</code></td>
+</tr>
+<tr>
+<td>Filings</td>
+<td>amendments and repeat filings</td>
+<td>dropped 8-K/A; one event per company per day 0; dropped follow-ups within 20 sessions</td>
+<td><code>events.py</code></td>
+</tr>
+<tr>
+<td>Filings</td>
+<td>times are in UTC; SEC dates shift after 17:30 New York time</td>
+<td>used the acceptance time converted to New York time, not the filing date</td>
+<td><code>edgar.py</code>, <code>test_edgar.py</code></td>
+</tr>
+<tr>
+<td>Filings</td>
+<td>8-K can lag the press release</td>
+<td>measured: biggest move on day 0 for 64% of events, day +1 for 20%; reported as a limit</td>
+<td><code>timing_validation.csv</code></td>
+</tr>
+<tr>
+<td>Events</td>
+<td>reaction needs two consecutive bars</td>
+<td>required a bar on day -1 and day 0; 1 event had no day-1 open and was dropped from return tables</td>
+<td><code>events.py</code>, <code>test_events.py</code></td>
+</tr>
+<tr>
+<td>Events</td>
+<td>nothing from the future</td>
+<td>tested: threshold built only from earlier quarters; filters use day -1 data; every buy is after its signal</td>
+<td><code>test_events.py</code></td>
+</tr>
+<tr>
+<td>Vendor</td>
+<td>two Massive endpoints disagree on about 1% of days by more than 1%</td>
+<td>used one endpoint (Daily Market Summary) throughout; noted</td>
+<td>decision log 01:10</td>
+</tr>
+</tbody>
+</table>
 <h2>4. How each event was built</h2>
 <ol>
 <li>Take every 8-K with Item 2.02 (earnings release).</li>

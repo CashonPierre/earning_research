@@ -54,6 +54,24 @@ Prices were downloaded *unadjusted* and split-adjusted by us, so price filters u
 
 **Why EDGAR.** Massive's 8-K endpoints give a filing *date* but no time, and their earnings tags start in 2020 and miss most releases. EDGAR gives the acceptance time to the second. It is public and free, and the time it shows is the time the news became public.
 
+### Cleaning and checks
+
+| Data | Problem | What we did | Where |
+|---|---|---|---|
+| Prices | vendor's adjusted prices rescale history to today's share count, so a $5 filter would look at the wrong price | downloaded unadjusted prices; applied split factors ourselves; checked against the vendor's factors (all tickers) and adjusted prices (split tickers) | `prices.py`, `test_prices.py`, `test_api_crosscheck.py` |
+| Prices | duplicate rows across pages | dropped duplicate (ticker, date) rows | `panel.py` |
+| Prices | holidays and missing days | trading calendar = days SPY traded; a return is missing if the previous day's bar is missing | `panel.py` |
+| Prices | ETFs, warrants, preferreds, OTC names mixed in | kept common stocks (type CS) on NYSE, Nasdaq, NYSE American, plus SPY | `panel.py`, `events.py` |
+| Prices | bad bars | tested: high >= open and close, low <= open and close in 99.8% of bars; closes positive; about 252 days per year | `test_prices.py` |
+| Tickers | one symbol reused by two companies over time | each ticker record is valid only between the previous namesake's delisting and its own | `panel.py` |
+| Tickers | companies with several share classes | kept the most liquid class per event | `events.py` |
+| Filings | amendments and repeat filings | dropped 8-K/A; one event per company per day 0; dropped follow-ups within 20 sessions | `events.py` |
+| Filings | times are in UTC; SEC dates shift after 17:30 New York time | used the acceptance time converted to New York time, not the filing date | `edgar.py`, `test_edgar.py` |
+| Filings | 8-K can lag the press release | measured: biggest move on day 0 for 64% of events, day +1 for 20%; reported as a limit | `timing_validation.csv` |
+| Events | reaction needs two consecutive bars | required a bar on day -1 and day 0; 1 event had no day-1 open and was dropped from return tables | `events.py`, `test_events.py` |
+| Events | nothing from the future | tested: threshold built only from earlier quarters; filters use day -1 data; every buy is after its signal | `test_events.py` |
+| Vendor | two Massive endpoints disagree on about 1% of days by more than 1% | used one endpoint (Daily Market Summary) throughout; noted | decision log 01:10 |
+
 ## 4. How each event was built
 
 1. Take every 8-K with Item 2.02 (earnings release).
